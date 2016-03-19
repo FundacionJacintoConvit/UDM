@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load render_table from django_tables2 %}
+{% block titulo %}B&uacute;squeda de Diagn&oacute;sticos{% endblock %}
+{% block cargar %}
+<script type="text/javascript">
+function cargar() {
+{% if request.GET.mensaje != null %}
+alert('{{ request.GET.mensaje }}');
+{% endif %}
+}
+
+function nuevoDiagnostico(campo) {
+    campo.form.action = '{% url 'salvar_diagnostico_medico' '' %}';
+    campo.form.method = 'GET';
+	campo.form.submit();
+}
+
+function editarDiagnostico(campo) {
+    var ids = document.getElementsByName('id'), indice, id;
+  
+    for (indice = 0; indice < ids.length; indice++) {
+        if (ids[indice].checked){
+            id = ids[indice].value;
+        }
+    }
+    if (id != null) {
+        campo.form.action = '{% url 'salvar_diagnostico_medico' '' %}' + id;
+        campo.form.method = 'GET';
+	    campo.form.submit();
+    } else {
+	    alert('Debe seleccionar un diagnóstico');
+	}
+}
+
+function eliminarDiagnostico(campo) {
+    var ids = document.getElementsByName('id'), indice, id;
+  
+    for (indice = 0; indice < ids.length; indice++) {
+        if (ids[indice].checked){
+            id = ids[indice].value;
+        }
+    }
+    if ((id != null) && confirm('¿Está seguro que desea eliminar el diagnostico?')) {
+        campo.form.action = '{% url 'eliminar_diagnostico' '' %}' + id;
+        campo.form.method = 'GET';
+	    campo.form.submit();
+    } else {
+	    alert('Debe seleccionar un diagnóstico');
+	}
+}
+
+function generarReporte(campo) {
+    var ids = document.getElementsByName('id'), indice, id;
+  
+    for (indice = 0; indice < ids.length; indice++) {
+        if (ids[indice].checked){
+            id = ids[indice].value;
+        }
+    }
+    if (id != null) {
+        campo.form.action = '{% url 'generar_reporte' '' %}' + id;
+		campo.form.method = 'GET';
+		campo.form.submit();
+    } else {
+	    alert('Debe seleccionar un diagnóstico');
+	}
+}
+</script>
+{% endblock %}
+{% block contenido %}
+   <table border="0" cellpadding="2" cellspacing="2" width="100%">
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Introduzca la identificaci&oacute;n, nombre o apellido y presione el bot&oacute;n buascar</legend>
+		  <form id="busqueda_diagnostico" name="busqueda_diagnostico" action="{% url 'busqueda_diagnostico_medico' %}" method="get">
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+	  	    <tr>
+		      <td width="15%">
+				<label for="id_buscar">Buscar</label>
+			  </td>
+			  <td width="70%">
+				<input class="campo" id="id_busqueda" name="busqueda" type="text" size="80"/>
+			  </td>
+			  <td width="15%">
+				<input class="campo" name="buscar" type="button" value="Buscar paciente registrado" onclick="this.form.submit()"/>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error" colspan="2">
+			    <span id="error_busqueda"></span>
+			  </td>
+			</tr>
+		  </table>
+		 </form>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Seleccione para editar o crear un nuevo diagn&oacute;stico</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+	  	    <tr>
+		      <td>
+				{% render_table tabla %}
+			  </td>
+			</tr>
+	  	    <tr>
+		      <td>
+			    <form id="salvar_diagnostico" name="salvar_diagnostico" action="{% url 'salvar_diagnostico_medico' '' %}" method="get">
+				<input class="campo" name="nuevo" type="button" value="Ingresar nueva solicitud de examen" onclick="nuevoDiagnostico(this)"/>
+				<input class="campo" name="editar" type="button" value="Editar solicitud de examen" onclick="editarDiagnostico(this)"/>
+				<input class="campo" name="editar" type="button" value="Imprimir reporte" onclick="generarReporte(this)"/>
+				</form>
+			  </td>
+			</tr>
+		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+  </table>
+{% endblock %}

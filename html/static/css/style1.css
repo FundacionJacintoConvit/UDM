@@ -1,0 +1,108 @@
+#wowslider-container1 {
+	margin: 0px auto; border: currentColor; border-image: none; text-align: left; position: relative; z-index: 90; -ms-zoom: 1; max-width: 950px;
+}
+* html #wowslider-container1 {
+	width: 950px;
+}
+#wowslider-container1 .ws_images ul {
+	list-style: none; margin: 0px; padding: 0px; left: 0px; width: 10000%; height: auto; overflow: visible; position: relative; border-spacing: 0;
+}
+#wowslider-container1 .ws_images ul li {
+	margin: 0px !important; padding: 0px !important; width: 1%; line-height: 0; font-size: 0px; float: left;
+}
+#wowslider-container1 .ws_images {
+	left: 0px; top: 0px; width: 100%; height: 100%; overflow: hidden; position: relative;
+}
+#wowslider-container1 .ws_images a {
+	width: 100%; color: transparent; display: block;
+}
+#wowslider-container1 img {
+	max-width: none !important;
+}
+#wowslider-container1 .ws_images img {
+	padding: 0px; border: 0px currentColor; border-image: none; width: 100%; max-width: none;
+}
+#wowslider-container1 a {
+	border: currentColor; border-image: none; text-decoration: none;
+}
+#wowslider-container1 .ws_bullets {
+	font-size: 0px; float: left; position: absolute; z-index: 70;
+}
+#wowslider-container1 .ws_bullets div {
+	float: left; position: relative;
+}
+#wowslider-container1 a.wsl {
+	display: none;
+}
+#wowslider-container1 sound {
+	position: absolute;
+}
+#wowslider-container1 object {
+	position: absolute;
+}
+#wowslider-container1 .ws_bullets {
+	padding: 9px;
+}
+#wowslider-container1 .ws_bullets a {
+	background: url("./bullet.png") left top; width: 11px; height: 11px; color: transparent; text-indent: -4000px; margin-left: 5px; float: left; position: relative;
+}
+#wowslider-container1 .ws_bullets a:hover {
+	background-position: 0px 50%;
+}
+#wowslider-container1 .ws_bullets a.ws_selbull {
+	background-position: 0px 100%;
+}
+#wowslider-container1 a.ws_next {
+	top: 50%; width: 45px; height: 45px; margin-top: -20px; display: block; position: absolute; z-index: 60; opacity: 0.8; background-image: url("./arrows.png");
+}
+#wowslider-container1 a.ws_prev {
+	top: 50%; width: 45px; height: 45px; margin-top: -20px; display: block; position: absolute; z-index: 60; opacity: 0.8; background-image: url("./arrows.png");
+}
+#wowslider-container1 a.ws_next {
+	background-position: 100% 0px; right: 21px;
+}
+#wowslider-container1 a.ws_prev {
+	background-position: 0px 0px; left: 21px;
+}
+#wowslider-container1 a.ws_next:hover {
+	opacity: 1;
+}
+#wowslider-container1 a.ws_prev:hover {
+	opacity: 1;
+}
+#wowslider-container1 .ws_bullets {
+	top: 6px; right: 6px;
+}
+#wowslider-container1 .ws-title {
+	background: rgb(255, 255, 255); margin: 9px 9px 9px 0px; padding: 8px; border-radius: 0px 10px 10px 0px; left: 0px; bottom: 17px; color: rgb(93, 93, 93); font-family: "Open Sans",Arial,Helvetica,sans-serif; font-size: 18px; display: block; position: absolute; z-index: 50; opacity: 0.8; box-shadow: 0px 0px 2px #5d5d5d; -moz-box-shadow: 0 0 2px #5D5D5D; -moz-border-radius: 0 10px 10px 0;
+}
+#wowslider-container1 .ws-title div {
+	padding-top: 5px; font-size: 14px;
+}
+#wowslider-container1 .ws_images ul {
+	animation:wsBasic 24s infinite; -moz-animation: wsBasic 24s infinite; -webkit-animation: wsBasic 24s infinite;
+}
+#wowslider-container1 .ws_images {
+	border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;
+}
+#wowslider-container1 .ws_effect img {
+	border-radius: 4px; -moz-border-radius: 4px; -webkit-border-radius: 4px;
+}
+#wowslider-container1 .ws_bullets a img {
+	border-radius: 5px; border: 4px solid rgb(255, 255, 255); border-image: none; left: -66px; top: 20px; text-indent: 0px; display: block; visibility: hidden; position: absolute; max-width: none; box-shadow: 0px 1px 3px rgba(0,0,0,0.4); -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4); -moz-border-radius: 5px;
+}
+#wowslider-container1 .ws_bullets a:hover img {
+	visibility: visible;
+}
+#wowslider-container1 .ws_bulframe div div {
+	height: 48px; overflow: visible; position: relative;
+}
+#wowslider-container1 .ws_bulframe div {
+	left: 0px; width: 132px; overflow: hidden; position: relative; background-color: rgb(255, 255, 255);
+}
+#wowslider-container1 .ws_bullets .ws_bulframe {
+	border-radius: 5px; border: 4px solid rgb(255, 255, 255); border-image: none; top: 18px; overflow: visible; display: none; position: absolute; cursor: pointer; box-shadow: 0px 1px 3px rgba(0,0,0,0.4); -moz-box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4); -moz-border-radius: 5px;
+}
+#wowslider-container1 .ws_bulframe span {
+	background: url("./triangle.png"); left: 66px; top: -10px; width: 15px; height: 6px; margin-left: -6px; display: block; position: absolute;
+}

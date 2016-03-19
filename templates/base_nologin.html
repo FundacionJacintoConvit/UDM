@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>{% block titulo %}{% endblock %}</title>
+	<link href="{{ STATIC_URL }}css/css.css" rel="stylesheet" type="text/css"/>
+	<link href="{{ STATIC_URL }}css/internal.css" rel="stylesheet" type="text/css"/>
+	<link href="{{ STATIC_URL }}css/normalize.css" rel="stylesheet" type="text/css"/>
+    <link href="{{ STATIC_URL }}css/style.css" rel="stylesheet" type="text/css"/>
+	<link href="{{ STATIC_URL }}css/calendario.css" rel="stylesheet" type="text/css"/>
+    <link href="{{ STATIC_URL }}django_tables2/themes/paleblue/css/screen.css" rel="stylesheet" type="text/css"/>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/calendario.js"></script>
+    <script type="text/javascript" src="{{ STATIC_URL }}js/util.js"></script>
+    <script type="text/javascript">
+    </script>
+    {% block cargar %}
+    <script type="text/javascript">
+    function cargar() {
+    }
+    </script>
+    {% endblock %}
+  </head>
+  <body onload="cargar()">
+	<div id="top-main">
+		<div id="top-main-nav">
+			{% block encabezado %}
+			<div id="logo2"><a href="/"><img src="{{ STATIC_URL }}img/logo-s.png" alt="" title="Fundaci&oacute;n Jacinto Convit" width="333" height="32" /></a></div>
+			{% endblock %}
+		</div>
+	</div>
+    <div id="main">
+	    <div id="ContenidoMain">
+		    {% block contenido %}
+			{% endblock %}
+    	</div>
+    </div>
+	<div id="site-map">
+		<div id="site-map-marco">
+		    {% block piedepagina %}
+			<div id="linea">
+				<div class="site-map-detalle">
+					<h2>Nosotros</h2>
+					   <a href="http://www.jacintoconvit.org/es/nosotros/?i=0">&iquest;Qui&eacute;nes somos?</a><br>
+					   <a href="http://www.jacintoconvit.org/es/nosotros/?i=1">Visi&oacute;n</a><br>
+						<a href="http://www.jacintoconvit.org/es/nosotros/?i=2">Objetivos</a><br>
+						<a href="http://www.jacintoconvit.org/es/nosotros/?i=3">Estrucutra</a><br>
+						<a href="http://www.jacintoconvit.org/es/nosotros/?i=4">CMC</a><br>
+						<a href="http://www.jacintoconvit.org/es/nosotros/?i=5">CCEIE</a><br>
+				</div>
+				
+				<div class="site-map-detalle">
+					<h2>Programas</h2>
+						<a href="http://www.jacintoconvit.org/es/programas/cancer/">C&aacute;ncer</a><br>
+						<a href="http://www.jacintoconvit.org/es/programas/chagas/">Chagas</a><br>
+						<a href="http://www.jacintoconvit.org/es/programas/leishmaniasis/">Leishmaniasis</a><br>
+						<a href="http://www.jacintoconvit.org/es/programas/lepra/">Lepra</a><br>
+						<a href="http://www.jacintoconvit.org/es/programas/red-dermatologica/">Red Nacional de Dermatolog&iacute;a Sanitaria</a><br>
+						<a href="http://www.jacintoconvit.org/es/programas/waraos/">Proyecto Waraos</a><br>
+			   </div>
+			   
+			   <div class="site-map-detalle">
+					<h2>Personal</h2>
+						<a href="http://www.jacintoconvit.org/es/personal/?i=0">Miembros</a><br>
+						<a href="http://www.jacintoconvit.org/es/personal/?i=1">Secretaria General</a><br>
+						<!--a href="/es/personal/?i=2">Director Acad&eacute;mico<br>y de Investigaci&oacute;n</a><br-->
+						<a href="http://www.jacintoconvit.org/es/personal/?i=2">Investigadores y Colaboradores</a><br>
+						<a href="http://www.jacintoconvit.org/es/personal/?i=3">Asesor&iacute;a y Soporte</a><br>
+				</div>
+
+				<div class="site-map-detalle">
+					<h2>Colaboradores</h2>
+						<a href="http://www.jacintoconvit.org/es/colaboradores/?i=0">Alianzas</a><br>
+						<a href="http://www.jacintoconvit.org/es/colaboradores/?i=1">Donantes</a><br>
+						<a href="http://www.jacintoconvit.org/es/colaboradores/?i=2">Servicios Pro-Bono</a><br>
+				</div>
+
+				<div class="site-map-detalle">            
+						<a href="http://www.jacintoconvit.org/es/donaciones/">Donaciones</a><br>
+						<a href="http://www.jacintoconvit.org/es/publicaciones/">Publicaciones</a><br>
+						<a href="http://www.jacintoconvit.org/es/consultas/">Consulta en l&iacute;nea</a><br>
+						<a href="http://www.jacintoconvit.org/es/empleo/">Empleo</a><br>
+						<a href="http://www.jacintoconvit.org/es/enlaces/">Enlaces de Inter&eacute;s</a><br>
+						<a href="http://www.jacintoconvit.org/es/prensa/">Prensa</a><br>
+				</div>
+			</div>
+
+			<div id="linea">
+				<hr>
+					<div id="politicas">
+						<a href="http://www.jacintoconvit.org/es/empleo/">Empleo</a> | 
+						<a href="http://www.jacintoconvit.org/es/enlaces/">Enlaces de Inter&eacute;s</a> | 
+						<a href="https://www.facebook.com/fundacionjacintoconvit" target="_blank">Facebook</a> | 
+						<a href="https://twitter.com/jacintoconvit" target="_blank">Twitter</a> | 
+						<a href="https://www.youtube.com/jacintoconvitgarcia/" target="_blank">Youtube</a> | 
+						<a href="http://www.jacintoconvit.org/es/contactenos/">Cont&aacute;ctenos</a>
+						<br><br>                
+						<a href="http://www.jacintoconvit.org/es/uso/">Condiciones de uso</a> | 
+						<a href="http://www.jacintoconvit.org/es/privacidad/">Pol&iacute;ticas de Privacidad</a>
+						<br>
+					</div>
+			
+					<div class="foot-final">Fundaci&oacute;n Jacinto Convit - RIF J-40111708-2</div>
+			</div>
+            {% endblock %}			
+		</div>
+	</div>
+  </body>
+</html>

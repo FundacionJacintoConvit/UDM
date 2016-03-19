@@ -1,0 +1,542 @@
+{% extends "base.html" %}
+{% block titulo %}Salvar Diagn&oacute;stico{% endblock %}
+{% block cargar %}
+<script type="text/javascript">
+function cargar() {
+	{% for error in form.non_field_errors %}
+	alert('{{ error }}');
+	{% endfor %}
+}
+
+function validar(campo) {
+	var forma = document.getElementById('salvar_diagnostico');
+    var campo1, campo2, campo3, option, errores = false, indice, longitud;
+		
+	if (campo == null) {
+	    document.getElementById('boton_salvar').disabled = true;
+		document.getElementById('boton_cancelar').disabled = true;
+	}
+	
+	if ((campo == null) || (campo.id == 'id_patologo_tipo_muestra')) {
+		campo1 = document.getElementById('id_patologo_tipo_muestra');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_diagnostico_forma_patologo_tipo_muestra').innerHTML = 'Debe introducir el tipo de muestra';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_diagnostico_forma_patologo_tipo_muestra').innerHTML = '&nbsp;';
+		}
+    }
+
+	if ((campo == null) || (campo.id == 'id_patologo_resultado')) {
+		campo1 = document.getElementById('id_patologo_resultado');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_diagnostico_forma_patologo_resultado').innerHTML = 'Debe introducir los resultados';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_diagnostico_forma_patologo_resultado').innerHTML = '&nbsp;';
+		}
+    }
+
+	if ((campo == null) || (campo.id == 'id_patologo_marcadores')) {
+		campo1 = document.getElementById('id_patologo_marcadores');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_diagnostico_forma_patologo_marcadores').innerHTML = 'Debe introducir los marcadores identificados';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_diagnostico_forma_patologo_marcadores').innerHTML = '&nbsp;';
+		}
+    }
+	
+	longitud = parseInt(document.getElementById('id_form-TOTAL_FORMS').value);
+	for (indice = 0; indice < longitud; indice++) {
+	    campo1 = document.getElementById('id_form-' + indice + '-nombre');
+		campo2 = document.getElementById('id_form-' + indice + '-link');
+	    campo3 = document.getElementById('id_form-' + indice + '-ruta');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length != 0 || campo2.value.replace(/^\s+|\s+$/g,"").length != 0 || campo3.value.replace(/^\s+|\s+$/g,"").length != 0) {
+		    if ((campo == null) || (campo.id == 'id_form-' + indice + '-nombre')) {
+				if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+					document.getElementById('error_id_form-' + indice + '-nombre').innerHTML = 'Debe introducir un nombre';
+					if ((campo == null) && !errores) campo2.focus();
+					errores = true;
+				} else {
+					document.getElementById('error_id_form-' + indice + '-nombre').innerHTML = '&nbsp;';
+				}
+			}
+			
+		    if ((campo == null) || (campo.id == 'id_form-' + indice + '-link') || (campo.id == 'id_form-' + indice + '-ruta')) {
+				if ((campo2.value.replace(/^\s+|\s+$/g,"").length == 0 && campo3.value.replace(/^\s+|\s+$/g,"").length == 0) || (campo2.value.replace(/^\s+|\s+$/g,"").length != 0 && campo3.value.replace(/^\s+|\s+$/g,"").length != 0)) {
+					document.getElementById('error_id_form-' + indice + '-link').innerHTML = 'Debe introducir o un link o una ruta';
+					if ((campo == null) && !errores) campo2.focus();
+					errores = true;
+				} if ((campo3.value.replace(/^\s+|\s+$/g,"").length != 0) && (campo3.files != null) && (campo3.files.length != null) && (campo3.files[0].size != null) && (campo3.files[0].size > 1572864)) {
+					document.getElementById('error_id_form-' + indice + '-ruta').innerHTML = 'El archivo es muy grande (mayor a 1.5M)';
+					if ((campo == null) && !errores) campo3.focus();
+					errores = true;
+				} else {
+					document.getElementById('error_id_form-' + indice + '-link').innerHTML = '&nbsp;';
+					document.getElementById('error_id_form-' + indice + '-ruta').innerHTML = '&nbsp;';
+				}
+			}
+		} else {
+		    document.getElementById('error_id_form-' + indice + '-nombre').innerHTML = '&nbsp;';
+			document.getElementById('error_id_form-' + indice + '-link').innerHTML = '&nbsp;';
+			document.getElementById('error_id_form-' + indice + '-ruta').innerHTML = '&nbsp;';
+		}
+	}
+	
+	if ((campo == null) && errores) {
+	    document.getElementById('boton_salvar').disabled = false;
+		document.getElementById('boton_cancelar').disabled = false;
+	}
+	
+	return !errores;
+}
+</script>
+{% endblock %}
+{% block contenido %}
+<form id="salvar_diagnostico" name="salvar_diagnostico" action="{% url 'salvar_diagnostico_patologo' pk %}" enctype="multipart/form-data" method="post">
+  {% csrf_token %}
+   <table border="0" cellpadding="2" cellspacing="2" width="100%">
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Informaci&oacute;n del pat&oacute;logo</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td>
+				<label for="id_first_name">Primer Nombre</label>
+			  </td>
+			  <td>
+				{{ patologo_user_forma.first_name }}
+			  </td>
+			  <td>
+				<label for="id_last_name">Segundo Nombre</label>
+			  </td>
+			  <td>
+				{{ patologo_user_forma.nombre_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_first_name">Primer Apellido</label>
+			  </td>
+			  <td>
+				{{ patologo_user_forma.last_name }}
+			  </td>
+			  <td>
+				<label for="id_last_name">Segundo Apellido</label>
+			  </td>
+			  <td>
+				{{ patologo_user_forma.apellido_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_first_name">Nacionalidad</label>
+			  </td>
+			  <td>
+				{{ patologo_user_forma.nacionalidad }}
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_institucion">Profesi&oacute;n</label>
+			  </td>
+			  <td>
+				{{ patologo_user_forma.profesion }}
+			  </td>
+			  <td>
+				<label for="id_unidad">Especializaci&oacute;n</label>
+			  </td>
+			  <td>
+				{{ patologo_user_forma.especializacion }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_institucion">Instituci&oacute;n de Procedencia</label>
+			  </td>
+			  <td>
+				{{ patologo_user_forma.institucion }}
+			  </td>
+			  <td>
+				<label for="id_unidad">Unidad / Departamento</label>
+			  </td>
+			  <td>
+				{{ patologo_user_forma.unidad }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_telefono">N del MPPS</label>
+			  </td>
+			  <td>
+				{{ patologo_user_forma.numero_mpps }}
+			  </td>
+			  <td>
+				<label for="id_telefono">N del Colegio</label>
+			  </td>
+			  <td>
+				{{ patologo_user_forma.numero_colegio }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_telefono">Tel&eacute;fono</label>
+			  </td>
+			  <td>
+				{{ patologo_user_forma.telefono }}
+			  </td>
+			  <td>
+				<label for="id_telefono">Correo electr&oacute;nico</label>
+			  </td>
+			  <td>
+				{{ patologo_user_forma.email }}
+			  </td>
+			</tr>
+		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Informaci&oacute;n del m&eacute;dico</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td>
+				<label for="id_first_name">Primer Nombre</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.first_name }}
+			  </td>
+			  <td>
+				<label for="id_last_name">Segundo Nombre</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.nombre_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_first_name">Primer Apellido</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.last_name }}
+			  </td>
+			  <td>
+				<label for="id_last_name">Segundo Apellido</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.apellido_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_first_name">Nacionalidad</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.nacionalidad }}
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_institucion">Profesi&oacute;n</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.profesion }}
+			  </td>
+			  <td>
+				<label for="id_unidad">Especializaci&oacute;n</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.especializacion }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_institucion">Instituci&oacute;n de Procedencia</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.institucion }}
+			  </td>
+			  <td>
+				<label for="id_unidad">Unidad / Departamento</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.unidad }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_telefono">N del MPPS</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.numero_mpps }}
+			  </td>
+			  <td>
+				<label for="id_telefono">N del Colegio</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.numero_colegio }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_telefono">Tel&eacute;fono</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.telefono }}
+			  </td>
+			  <td>
+				<label for="id_telefono">Correo electr&oacute;nico</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.email }}
+			  </td>
+			</tr>
+		  </table>
+		  </fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Informaci&oacute;n del paciente</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td>
+				<label for="id_id">N&uacute;mero de Historia</label>
+			  </td>
+			  <td>
+				<input class="campo" name="paciente_pk" type="text" value="{{ paciente_pk }}" size="40" disabled="disabled"/>
+			  </td>
+			  <td>
+				<label for="id_numero_historia">N&uacute;mero de Historia Externo</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.numero_historia }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_nombre">Primer Nombre</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.nombre_primero }}
+			  </td>
+			  <td>
+				<label for="id_apellido">Segundo Nombre</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.nombre_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_nombre">Primer Apellido</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.apellido_primero }}
+			  </td>
+			  <td>
+				<label for="id_apellido">Segundo Apellido</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.apellido_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_edad">Edad</label>
+			  </td>
+			  <td colspan="3">
+				{{ paciente_forma.edad_anios }} a&ntilde;os {{ paciente_forma.edad_meses }} meses
+			  </td>
+			</tr>
+		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset id="diagnostico">
+		  <legend>Introduzca la informaci&oacute;n del diagn&oacute;stico</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td>
+				<label for="id_patologo_tipo_muestra"><span class="requerido">*</span>Tipo de Muestra</label>
+			  </td>
+			  <td>
+			    {{ diagnostico_forma.patologo_tipo_muestra }}
+			  </td>
+    	    </tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_diagnostico_forma_patologo_tipo_muestra"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_patologo_resultado"><span class="requerido">*</span>Resultado</label>
+			  </td>
+			  <td>
+			    {{ diagnostico_forma.patologo_resultado }}
+			  </td>
+    	    </tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_diagnostico_forma_patologo_resultado"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_patologo_marcadores"><span class="requerido">*</span>Marcadores</label>
+			  </td>
+			  <td>
+			    {{ diagnostico_forma.patologo_marcadores }}
+			  </td>
+    	    </tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_diagnostico_forma_patologo_marcadores"></span>
+			  </td>
+			</tr>
+  	  	  </table>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset id="fotos">
+		  <legend>Introduzca las fotos del tejido</legend>
+		  {{ estudios_forma_set.management_form }}
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td align="center">
+				<label>Nombre</label>
+			  </td>
+			  <td align="center">
+				<label>Link</label>
+			  </td>
+			  <td align="center">
+				<label>Foto</label>
+			  </td>
+			  <td align="center">
+				<label>Eliminar</label>
+			  </td>
+			</tr>
+			{% for estudio_forma in estudios_forma_set %}
+			<tr>
+			  <td align="center">
+			    {{ estudio_forma.id }}
+				{{ estudio_forma.nombre }}
+			  </td>
+			  <td align="center">
+			    {% if estudio_forma.link.value or estudio_forma.ruta.value %}
+				{% if estudio_forma.link.value %}
+				<a href="{{ estudio_forma.link.value }}" target="_blank">{{ estudio_forma.link.value }}</a>
+				{{ estudio_forma.link.as_hidden }}
+				{% endif %}
+				{% else %}
+				{{ estudio_forma.link }}
+				{% endif %}
+			  </td>
+			  <td align="center">
+			    {% if estudio_forma.link.value or estudio_forma.ruta.value %}
+				{% if estudio_forma.ruta.value %}
+				<a href="{{ STATIC_URL }}{{ estudio_forma.ruta.value }}" target="_blank" class="campo">{{ estudio_forma.ruta.value }}</a>
+				{{ estudio_forma.ruta.as_hidden }}
+				{% endif %}
+				{% else %}
+				{{ estudio_forma.ruta }}
+				{% endif %}
+			  </td>
+			  <td align="center">
+				{{ estudio_forma.DELETE }}
+			  </td>
+			</tr>
+			<tr>
+			  <td class="error">
+				<span id="error_{{ estudio_forma.nombre.auto_id }}">&nbsp;</span>
+			  </td>
+			  <td class="error">
+				<span id="error_{{ estudio_forma.link.auto_id }}">&nbsp;</span>
+			  </td>
+			  <td class="error">
+				<span id="error_{{ estudio_forma.ruta.auto_id }}">&nbsp;</span>
+			  </td>
+			  <td class="error">
+				&nbsp;
+			  </td>
+			</tr>
+            {% endfor %}
+		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Introduzca alguna observaci&oacute;n</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td>
+				<label for="id_udm_observaciones">Observaciones</label>
+			  </td>
+			  <td>
+				{{ diagnostico_forma.patologo_observaciones }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_diagnostico_forma_patologo_observaciones"></span>
+			  </td>
+			</tr>
+			</tr>
+   		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+	<tr>
+	  <td align="center" class="error">
+		{{ diagnostico_forma.non_field_errors }}
+		{{ estudios_forma_set.non_field_errors }}
+	  </td>
+	</tr>
+	<tr>
+	  <td align="center">
+		<input id="boton_salvar" name="boton_salvar" type="button" value="Salvar Informaci&oacute;n" onclick="if (validar()) { this.form.method = 'POST'; this.form.submit() }"/>
+		<input id="boton_cancelar" name="boton_cancelar" type="button" value="Cancelar" onclick="if (confirm('\u00BFDesea cancelar?')) document.location='{% url 'busqueda_diagnostico_patologo' %}'"/>
+	  </td>
+	</tr>
+  </table>
+</form>
+{% endblock %}

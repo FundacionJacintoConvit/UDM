@@ -1,0 +1,213 @@
+.clearfix::after {
+	height: 0px; line-height: 0; clear: both; display: block; visibility: hidden; content: ".";
+}
+.row::after {
+	height: 0px; line-height: 0; clear: both; display: block; visibility: hidden; content: ".";
+}
+.clearfix {
+	display: inline-block;
+}
+.row {
+	display: inline-block;
+}
+html[xmlns] .clearfix {
+	display: block;
+}
+html[xmlns] .row {
+	display: block;
+}
+*:focus {
+	
+}
+input {
+	margin: 0px; padding: 0px; color: rgb(89, 89, 89); font-family: Arial, Helvetica, sans-serif; font-size: 18px;
+}
+select {
+	margin: 0px; padding: 0px; color: rgb(89, 89, 89); font-family: Arial, Helvetica, sans-serif; font-size: 18px;
+}
+textarea {
+	margin: 0px; padding: 0px; color: rgb(89, 89, 89); font-family: Arial, Helvetica, sans-serif; font-size: 18px;
+}
+a {
+	color: rgb(93, 132, 165); text-decoration: none;
+}
+a:hover {
+	text-decoration: underline;
+}
+#container h2 {
+	padding: 0px 0px 10px; color: rgb(41, 41, 41); font-size: 36px; font-weight: bold;
+}
+#container h3 {
+	color: rgb(127, 127, 127); line-height: 20px; font-size: 17px; font-weight: normal;
+}
+#left_side {
+	width: 642px; float: left;
+}
+#container {
+	background: rgb(255, 255, 255); margin: 10px auto 15px; padding: 20px 0px 20px 20px; border-radius: 10px; border: 1px solid rgb(213, 213, 213); border-image: none; width: 620px; overflow: hidden; box-shadow: 0px 0px 20px rgba(3,44,52,0.22); -moz-box-shadow: 0 0 20px rgba(3, 44, 52, .22); -webkit-box-shadow: 0 0 20px rgba(3, 44, 52, .22); -moz-border-radius: 10px; -webkit-border-radius: 10px;
+}
+article {
+	padding: 15px 0px 0px; width: 620px;
+}
+hgroup {
+	margin-right: 20px;
+}
+.form {
+	margin: 0px; padding: 0px;
+}
+.form fieldset {
+	margin: 0px; padding: 10px 0px 0px; border: currentColor; border-image: none;
+}
+.form .last {
+	margin: 0px !important;
+}
+.form h4 {
+	color: rgb(6, 59, 130); line-height: 33px; font-size: 25px; margin-bottom: 15px;
+}
+.form h4 span {
+	background: url("../images/h4_span.png") no-repeat center; padding: 0px 10px; width: 13px; height: 33px; color: rgb(255, 255, 255); font-size: 19px; font-weight: bold; margin-right: 15px; float: left; display: block; text-shadow: 1px 1px 0px #d6ed94;
+}
+.form .row {
+	margin-bottom: 20px;
+}
+.form label {
+	width: 100%; color: rgb(89, 89, 89); padding-bottom: 9px; font-size: 16px; float: left; display: block;
+}
+.form label em {
+	color: rgb(227, 54, 54); font-weight: bold; margin-left: 3px;
+}
+.form label a {
+	color: rgb(0, 113, 185);
+}
+.form label .tooltip {
+	background: url("../images/tooltip.png") no-repeat; width: 17px; height: 17px; margin-right: 5px; float: right; display: block;
+}
+.form .inner_labels label {
+	padding: 7px 15px 7px 0px; width: auto;
+}
+.form input[type='text'] {
+	background: rgb(245, 245, 245); border-radius: 3px; border: 1px solid rgb(197, 197, 197); border-image: none; box-shadow: 0px 0px 5px rgba(0,0,0,0.1), inset 0px 2px 2px rgba(0,0,0,0.1); -moz-box-shadow: 0 0 5px rgba(0, 0, 0, .1), 0 2px 2px rgba(0, 0, 0, .1) inset; -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .1), 0 2px 2px rgba(0, 0, 0, .1) inset; -moz-border-radius: 3px; -webkit-border-radius: 3px;
+}
+.form .row input[type='password'] {
+	background: rgb(245, 245, 245); border-radius: 3px; border: 1px solid rgb(197, 197, 197); border-image: none; box-shadow: 0px 0px 5px rgba(0,0,0,0.1), inset 0px 2px 2px rgba(0,0,0,0.1); -moz-box-shadow: 0 0 5px rgba(0, 0, 0, .1), 0 2px 2px rgba(0, 0, 0, .1) inset; -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .1), 0 2px 2px rgba(0, 0, 0, .1) inset; -moz-border-radius: 3px; -webkit-border-radius: 3px;
+}
+.form select {
+	background: rgb(245, 245, 245); border-radius: 3px; border: 1px solid rgb(197, 197, 197); border-image: none; box-shadow: 0px 0px 5px rgba(0,0,0,0.1), inset 0px 2px 2px rgba(0,0,0,0.1); -moz-box-shadow: 0 0 5px rgba(0, 0, 0, .1), 0 2px 2px rgba(0, 0, 0, .1) inset; -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .1), 0 2px 2px rgba(0, 0, 0, .1) inset; -moz-border-radius: 3px; -webkit-border-radius: 3px;
+}
+.form textarea {
+	background: rgb(245, 245, 245); border-radius: 3px; border: 1px solid rgb(197, 197, 197); border-image: none; box-shadow: 0px 0px 5px rgba(0,0,0,0.1), inset 0px 2px 2px rgba(0,0,0,0.1); -moz-box-shadow: 0 0 5px rgba(0, 0, 0, .1), 0 2px 2px rgba(0, 0, 0, .1) inset; -webkit-box-shadow: 0 0 5px rgba(0, 0, 0, .1), 0 2px 2px rgba(0, 0, 0, .1) inset; -moz-border-radius: 3px; -webkit-border-radius: 3px;
+}
+.form input[type='text'] {
+	padding: 1px 10px; width: 268px; height: 33px; line-height: 33px;
+}
+.form .row input[type='password'] {
+	padding: 1px 10px; width: 268px; height: 33px; line-height: 33px;
+}
+.form select {
+	padding: 6px 5px; width: 290px; height: 37px; line-height: 33px;
+}
+.form textarea {
+	padding: 5px 10px; width: 580px; height: 95px; line-height: 19px; font-size: 15px;
+}
+.form input[type='checkbox'] {
+	margin: 10px 7px 10px 0px; float: left; display: block;
+}
+.form .row input[type='radio'] {
+	margin: 10px 7px 10px 0px; float: left; display: block;
+}
+.form input.hasDatepicker {
+	width: 113px; margin-right: -27px; float: left;
+}
+.form img.ui-datepicker-trigger {
+	margin-top: 9px; float: left;
+}
+.form input[type='text']:focus {
+	border: 1px solid rgb(184, 213, 100); border-image: none; box-shadow: 0px 0px 5px #b8d564, inset 0px 2px 2px rgba(0,0,0,0.1); -moz-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset; -webkitkit-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset;
+}
+.form .row input[type='password']:focus {
+	border: 1px solid rgb(184, 213, 100); border-image: none; box-shadow: 0px 0px 5px #b8d564, inset 0px 2px 2px rgba(0,0,0,0.1); -moz-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset; -webkitkit-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset;
+}
+.form .row select:focus {
+	border: 1px solid rgb(184, 213, 100); border-image: none; box-shadow: 0px 0px 5px #b8d564, inset 0px 2px 2px rgba(0,0,0,0.1); -moz-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset; -webkitkit-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset;
+}
+.form .row textarea:focus {
+	border: 1px solid rgb(184, 213, 100); border-image: none; box-shadow: 0px 0px 5px #b8d564, inset 0px 2px 2px rgba(0,0,0,0.1); -moz-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset; -webkitkit-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset;
+}
+.form .row input[type='text']:hover {
+	border: 1px solid rgb(184, 213, 100); border-image: none; box-shadow: 0px 0px 5px #b8d564, inset 0px 2px 2px rgba(0,0,0,0.1); -moz-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset; -webkitkit-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset;
+}
+.form .row input[type='password']:hover {
+	border: 1px solid rgb(184, 213, 100); border-image: none; box-shadow: 0px 0px 5px #b8d564, inset 0px 2px 2px rgba(0,0,0,0.1); -moz-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset; -webkitkit-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset;
+}
+.form .row select:hover {
+	border: 1px solid rgb(184, 213, 100); border-image: none; box-shadow: 0px 0px 5px #b8d564, inset 0px 2px 2px rgba(0,0,0,0.1); -moz-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset; -webkitkit-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset;
+}
+.form .row textarea:hover {
+	border: 1px solid rgb(184, 213, 100); border-image: none; box-shadow: 0px 0px 5px #b8d564, inset 0px 2px 2px rgba(0,0,0,0.1); -moz-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset; -webkitkit-box-shadow: 0 0 5px #b8d564, 0 2px 2px rgba(0, 0, 0, .1) inset;
+}
+.form input.error {
+	border: 1px solid rgb(235, 147, 147); border-image: none; box-shadow: 0px 0px 5px #f7c4c4; background-color: rgb(252, 228, 228); -moz-box-shadow: 0 0 5px #f7c4c4; -webkit-box-shadow: 0 0 5px #f7c4c4;
+}
+.form select.error {
+	border: 1px solid rgb(235, 147, 147); border-image: none; box-shadow: 0px 0px 5px #f7c4c4; background-color: rgb(252, 228, 228); -moz-box-shadow: 0 0 5px #f7c4c4; -webkit-box-shadow: 0 0 5px #f7c4c4;
+}
+.form textarea.error {
+	border: 1px solid rgb(235, 147, 147); border-image: none; box-shadow: 0px 0px 5px #f7c4c4; background-color: rgb(252, 228, 228); -moz-box-shadow: 0 0 5px #f7c4c4; -webkit-box-shadow: 0 0 5px #f7c4c4;
+}
+.form input[type='submit'] {
+	background: rgb(103, 187, 207); padding: 5px 20px; border-radius: 3px; border: 1px solid rgb(40, 156, 184); border-image: none; color: rgb(28, 70, 78); font-size: 16px; font-weight: bold; margin-right: 20px; float: right; cursor: pointer; text-shadow: 1px 1px 0px #aaeaf7; -moz-border-radius: 3px; -webkit-border-radius: 3px;
+}
+.form input[type='submit']:hover {
+	background: rgb(81, 177, 199);
+}
+.form span.label {
+	margin: 0px 10px 0px 0px; color: rgb(89, 89, 89); line-height: 33px; float: left;
+}
+.form p.hint {
+	margin: 5px 0px 0px; color: rgb(176, 176, 176); font-size: 11px;
+}
+.form .item {
+	width: 294px; margin-right: 16px; float: left;
+}
+.form .item span.label {
+	width: 100%; line-height: normal; margin-bottom: 10px;
+}
+.copy {
+	margin: 10px 16px 20px 0px; color: rgb(158, 171, 174); font-size: 12px; float: right; text-shadow: 1px 1px 1px #fff;
+}
+aside {
+	padding: 75px 0px 0px 20px; width: 240px; float: left;
+}
+aside h5 {
+	color: rgb(10, 50, 99); line-height: 30px; font-family: Georgia; font-size: 28px; font-style: italic; margin-bottom: 15px;
+}
+aside a.login {
+	background: url("../images/ico_login.png") no-repeat left; color: rgb(16, 80, 160); line-height: 19px; padding-left: 25px; font-size: 17px; margin-bottom: 40px; display: block; text-shadow: 1px 1px 1px #fff;
+}
+aside .item {
+	background: url("../images/aside_h6.png") no-repeat 20px top; margin: 0px 0px 20px -20px; padding: 4px 0px 10px 50px; border-bottom-color: rgb(255, 255, 255); border-bottom-width: 1px; border-bottom-style: solid; box-shadow: 0px 1px 0px rgba(0,0,0,0.1); -moz-box-shadow: 0 1px 0px rgba(0, 0, 0, .1); -webkit-box-shadow: 0 1px 0px rgba(0, 0, 0, .1);
+}
+aside .last.item {
+	border: currentColor; border-image: none; box-shadow: none; -moz-box-shadow: none; -webkit-box-shadow: none;
+}
+aside h6 {
+	color: rgb(16, 80, 160); line-height: 20px; font-size: 17px; margin-bottom: 10px; text-shadow: 1px 1px 1px #fff;
+}
+aside p {
+	color: rgb(96, 125, 161); line-height: 15px; font-size: 12px; text-shadow: 1px 1px 1px #fff;
+}
+#tooltip {
+	background: rgb(163, 197, 92); padding: 10px; border-radius: 5px; color: rgb(33, 43, 4); line-height: 17px; font-size: 12px; display: none; position: absolute; z-index: 100; box-shadow: -1px 1px 1px #e8e8e8; text-shadow: 1px 1px 1px #fff; -moz-box-shadow: -1px 1px 1px #e8e8e8; -webkit-box-shadow: -1px 1px 1px #e8e8e8; -moz-border-radius: 5px; -webkit-border-radius: 5px;
+}
+#tooltip em {
+	background: url("../images/tooltip_em.png"); left: 50%; width: 12px; height: 6px; bottom: -6px; margin-left: -6px; display: block; position: absolute;
+}
+.form .ui-slider {
+	background: url("../images/slider.png") repeat-x; border: currentColor; border-image: none; height: 9px; margin-top: 42px; margin-right: 4px;
+}
+.form .ui-slider .ui-slider-handle {
+	background: url("../images/slider_handle.png") no-repeat; border: 0px currentColor; border-image: none; width: 19px; height: 19px; margin-top: -1px; cursor: pointer;
+}
+.form .ui-slider .ui-slider-range {
+	background: url("../images/slider_range.png") repeat-x; border-radius: 5px; border: 1px solid rgb(187, 187, 187); border-image: none; height: 7px; -moz-border-radius: 5px 5px 5px 5px; -webkit-border-radius: 5px 5px 5px 5px;
+}

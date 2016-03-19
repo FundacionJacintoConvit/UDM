@@ -1,0 +1,977 @@
+{% extends "base.html" %}
+{% block titulo %}Salvar Diagn&oacute;stico{% endblock %}
+{% block cargar %}
+<script type="text/javascript">
+function cargar() {
+	cambiarTipoMuestra();
+	cambiarResultadoPresente();
+	{% for error in form.non_field_errors %}
+	alert('{{ error }}');
+	{% endfor %}
+}
+
+function cambiarTipoMuestra() {
+    var forma = document.getElementById('salvar_diagnostico');
+    var campo_tipo_muestra = document.getElementById('id_udm_tipo_muestra');
+    var campo_tipo_muestra_otro = document.getElementById('id_udm_tipo_muestra_otro');
+    var label_tipo_muestra_otro = document.getElementById('label_udm_tipo_muestra_otro');
+  
+    if ((campo_tipo_muestra.selectedIndex == 2) || (campo_tipo_muestra.selectedIndex == 3) || (campo_tipo_muestra.selectedIndex == 4) || (campo_tipo_muestra.selectedIndex == 11) || (campo_tipo_muestra.selectedIndex == 12)) {
+        campo_tipo_muestra_otro.style.visibility = 'visible';
+	    label_tipo_muestra_otro.innerHTML = '<span class="requerido">*</span>Tipo';
+    } else {
+        campo_tipo_muestra_otro.style.visibility = 'hidden';
+		campo_tipo_muestra_otro.value = '';
+	    label_tipo_muestra_otro.innerHTML = '&nbsp;';
+    }
+}
+
+function cambiarResultadoPresente(campo) {
+    var forma = document.getElementById('salvar_diagnostico');
+	var indice, min_indice = 0, max_indice = 10, campo_presente, campo_resultado, campo_tipo;
+	
+	if (campo != null) {
+	    indice = campo.name.indexOf('-', 11);
+		indice = parseInt(campo.name.substring(11, indice));
+		max_indice = indice;
+	} else {
+	    indice = 0;
+	}
+	
+	for (; indice <= max_indice; indice++) {
+	    campo_resultado_s = obtenerCampo(forma, 'examenes-' + indice + '-resultado', 'True');
+		campo_resultado_n = obtenerCampo(forma, 'examenes-' + indice + '-resultado', 'False');
+	    campo_tipo = document.getElementById('id_examenes-' + indice + '-tipo');
+		if (campo_resultado_s == null || campo_resultado_s.checked) {
+			if (campo_tipo != null) {
+				campo_tipo.disabled = false;
+			}
+		}					
+		if (campo_resultado_n != null && campo_resultado_n.checked) {
+			if (campo_tipo != null) {
+				campo_tipo.disabled = true;
+				if (campo_tipo.selectedIndex) { 
+					campo_tipo.selectedIndex = 0;
+				} else {
+					campo_tipo.value = '';
+				}		
+			}				
+		}
+	}
+}
+
+function validar(campo) {
+	var forma = document.getElementById('salvar_diagnostico');
+    var indice, campo1, campo2, campo3, campo4, option, errores = false;
+	
+	if (campo == null) {
+	    document.getElementById('boton_salvar').disabled = true;
+		document.getElementById('boton_cancelar').disabled = true;
+	}
+		
+	if ((campo == null) || (campo.id == 'id_udm_tipo_muestra') || (campo.id == 'id_udm_tipo_muestra_otro')) {
+		campo1 = document.getElementById('id_udm_tipo_muestra');
+		if (campo1.selectedIndex == 0) {
+			document.getElementById('error_diagnostico_forma_udm_tipo_muestra').innerHTML = 'Debe seleccionar el tipo de muestra';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+		    if ((campo1.selectedIndex == 2) || (campo1.selectedIndex == 3) || (campo1.selectedIndex == 4) || (campo1.selectedIndex == 11) || (campo1.selectedIndex == 12)) {
+				if ((campo == null) || (campo.id == 'id_udm_tipo_muestra_otro')) {
+    			    campo1 = document.getElementById('id_udm_tipo_muestra_otro');
+
+    				if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+						document.getElementById('error_diagnostico_forma_udm_tipo_muestra_otro').innerHTML = 'Debe introducir un tipo';
+						if ((campo == null) && !errores) campo1.focus();
+						errores = true;
+					} else {
+					    document.getElementById('error_diagnostico_forma_udm_tipo_muestra_otro').innerHTML = '&nbsp;';
+					}
+				}
+			}
+			
+			document.getElementById('error_diagnostico_forma_udm_tipo_muestra').innerHTML = '&nbsp;';
+		}
+    }
+
+	if ((campo == null) || (campo.id == 'id_udm_tecnica_deteccion')) {
+		campo1 = document.getElementById('id_udm_tecnica_deteccion');
+		if (campo1.selectedIndex == 0) {
+			document.getElementById('error_diagnostico_forma_udm_tecnica_deteccion').innerHTML = 'Debe seleccionar la t&eacute;cnica de detecci&oacute;n';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_diagnostico_forma_udm_tecnica_deteccion').innerHTML = '&nbsp;';
+		}
+    }
+	
+	for (indice = 0; indice < 11; indice++) {
+		campo2 = obtenerCampo(forma, 'examenes-' + indice + '-resultado', 'True');
+		campo3 = obtenerCampo(forma, 'examenes-' + indice + '-resultado', 'False');
+	    campo4 = document.getElementById('id_examenes-' + indice + '-tipo');
+		if (campo2 || campo3 || campo4) {
+			if (campo2 && campo3 && !campo2.checked && !campo3.checked) {
+				if ((campo == null) || (campo.name == 'examenes-' + indice + '-resultado')) {
+					document.getElementById('error_id_examenes-' + indice + '-resultado').innerHTML = 'Debe seleccionar el resultado';
+					if ((campo == null) && !errores) campo2.focus();
+					errores = true;
+				}
+			} else if (campo4 && (!campo2 || campo2.checked)) {
+				if (!campo || (campo.id == 'id_examenes-' + indice + '-tipo')) {
+					if (((campo4.selectedIndex != null) && (campo4.selectedIndex == 0)) || ((campo4.selectedIndex == null) && (campo4.value != null) && (campo4.value.replace(/^\s+|\s+$/g,"").length == 0))) {
+						document.getElementById('error_id_examenes-' + indice + '-tipo').innerHTML = 'Debe introducir un tipo';
+						if ((campo == null) && !errores) campo4.focus();
+						errores = true;
+					} else {
+						document.getElementById('error_id_examenes-' + indice + '-tipo').innerHTML = '&nbsp;';
+					}
+				}
+				
+				document.getElementById('error_id_examenes-' + indice + '-resultado').innerHTML = '&nbsp;';
+			} else {
+				document.getElementById('error_id_examenes-' + indice + '-resultado').innerHTML = '&nbsp;';
+				document.getElementById('error_id_examenes-' + indice + '-tipo').innerHTML = '&nbsp;';
+			}
+		}
+	}
+
+	if ((campo == null) && errores) {
+	    document.getElementById('boton_salvar').disabled = false;
+		document.getElementById('boton_cancelar').disabled = false;
+	}
+	
+	return !errores;
+}
+</script>
+{% endblock %}
+{% block contenido %}
+<form id="salvar_diagnostico" name="salvar_diagnostico" action="{% url 'salvar_diagnostico_udm' pk %}" method="post">
+  {% csrf_token %}
+   <table border="0" cellpadding="2" cellspacing="2" width="100%">
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Informaci&oacute;n del usuario de UDM</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td>
+				<label for="id_first_name">Primer Nombre</label>
+			  </td>
+			  <td>
+				{{ udm_user_forma.first_name }}
+			  </td>
+			  <td>
+				<label for="id_last_name">Segundo Nombre</label>
+			  </td>
+			  <td>
+				{{ udm_user_forma.nombre_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_first_name">Primer Apellido</label>
+			  </td>
+			  <td>
+				{{ udm_user_forma.last_name }}
+			  </td>
+			  <td>
+				<label for="id_last_name">Segundo Apellido</label>
+			  </td>
+			  <td>
+				{{ udm_user_forma.apellido_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_first_name">Nacionalidad</label>
+			  </td>
+			  <td>
+				{{ udm_user_forma.nacionalidad }}
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_institucion">Profesión</label>
+			  </td>
+			  <td>
+				{{ udm_user_forma.profesion }}
+			  </td>
+			  <td>
+				<label for="id_unidad">Especialización</label>
+			  </td>
+			  <td>
+				{{ udm_user_forma.especializacion }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_institucion">Instituci&oacute;n de Procedencia</label>
+			  </td>
+			  <td>
+				{{ udm_user_forma.institucion }}
+			  </td>
+			  <td>
+				<label for="id_unidad">Unidad / Departamento</label>
+			  </td>
+			  <td>
+				{{ udm_user_forma.unidad }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_telefono">N del MPPS</label>
+			  </td>
+			  <td>
+				{{ udm_user_forma.numero_mpps }}
+			  </td>
+			  <td>
+				<label for="id_telefono">N del Colegio</label>
+			  </td>
+			  <td>
+				{{ udm_user_forma.numero_colegio }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_telefono">Tel&eacute;fono</label>
+			  </td>
+			  <td>
+				{{ udm_user_forma.telefono }}
+			  </td>
+			  <td>
+				<label for="id_telefono">Correo electrónico</label>
+			  </td>
+			  <td>
+				{{ udm_user_forma.email }}
+			  </td>
+			</tr>
+		  </table>
+   	  </fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Informaci&oacute;n del paciente</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td>
+				<label for="id_id">N&uacute;mero de Historia</label>
+			  </td>
+			  <td>
+				<input class="campo" name="paciente_pk" type="text" value="{{ paciente_pk }}" size="40" disabled="disabled"/>
+			  </td>
+			  <td>
+				<label for="id_numero_historia">N&uacute;mero de Historia Externo</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.numero_historia }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_nombre">Primer Nombre</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.nombre_primero }}
+			  </td>
+			  <td>
+				<label for="id_apellido">Segundo Nombre</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.nombre_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_nombre">Primer Apellido</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.apellido_primero }}
+			  </td>
+			  <td>
+				<label for="id_apellido">Segundo Apellido</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.apellido_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_edad">Edad</label>
+			  </td>
+			  <td colspan="3">
+				{{ paciente_forma.edad_anios }} a&ntilde;os {{ paciente_forma.edad_meses }} meses
+			  </td>
+			</tr>
+		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+	<tr>
+      <td>
+	    <fieldset>
+		  <legend>Informaci&oacute;n del m&eacute;dico</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td>
+				<label for="id_first_name">Primer Nombre</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.first_name }}
+			  </td>
+			  <td>
+				<label for="id_last_name">Segundo Nombre</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.nombre_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_first_name">Primer Apellido</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.last_name }}
+			  </td>
+			  <td>
+				<label for="id_last_name">Segundo Apellido</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.apellido_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_first_name">Nacionalidad</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.nacionalidad }}
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_institucion">Profesión</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.profesion }}
+			  </td>
+			  <td>
+				<label for="id_unidad">Especialización</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.especializacion }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_institucion">Instituci&oacute;n de Procedencia</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.institucion }}
+			  </td>
+			  <td>
+				<label for="id_unidad">Unidad / Departamento</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.unidad }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_telefono">N del MPPS</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.numero_mpps }}
+			  </td>
+			  <td>
+				<label for="id_telefono">N del Colegio</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.numero_colegio }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_telefono">Tel&eacute;fono</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.telefono }}
+			  </td>
+			  <td>
+				<label for="id_telefono">Correo electrónico</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.email }}
+			  </td>
+			</tr>
+		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Introduzca la informaci&oacute;n del tipo de muestra</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td>
+				<label for="id_udm_tipo_muestra"><span class="requerido">*</span>Tipo de Muestra</label>
+			  </td>
+			  <td>
+				{{ diagnostico_forma.udm_tipo_muestra }}
+			  </td>
+			  <td>
+				<label id="label_udm_tipo_muestra_otro" for="id_udm_tipo_muestra_otro">&nbsp;</label>
+			  </td>
+			  <td>
+				{{ diagnostico_forma.udm_tipo_muestra_otro }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_diagnostico_forma_udm_tipo_muestra"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_diagnostico_forma_udm_tipo_muestra_otro"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_udm_tecnica_deteccion"><span class="requerido">*</span>T&eacute;cnica de Detecci&oacute;n</label>
+			  </td>
+			  <td colspan="3">
+				{{ diagnostico_forma.udm_tecnica_deteccion }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error" colspan="3">
+				<span id="error_diagnostico_forma_udm_tecnica_deteccion"></span>
+			  </td>
+			</tr>
+		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset id="examenes">
+		  <legend>Introduzca los resultados</legend>
+		  {{ examenes_forma_set.management_form }}
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			{% for examen_forma in examenes_forma_set %}
+			<tr>
+			  <td>
+				<label>{{ examen_forma.nombre.value }}</label>
+				{{ examen_forma.id.as_hidden }}
+				{{ examen_forma.nombre.as_hidden }}
+				{{ examen_forma.presente.as_hidden }}
+				{{ examen_forma.orden.as_hidden }}
+			  </td>
+			  <td align="center">
+			    {% if examen_forma.nombre.value != 'Cuantificación del gen n-MYC' %}
+			    {% if examen_forma.nombre.value == 'Metilación del gen MGMT' %}
+				<label>No Metilado</label>
+				{% elif examen_forma.nombre.value == 'Detección del gen n-MYC' %}
+                <label>Presente</label>
+				{% else %}
+				<label>Positivo</label>
+				{% endif %}
+				{{ examen_forma.resultado.0.tag }}
+			    {% if examen_forma.nombre.value == 'Metilación del gen MGMT' %}
+				<label>Metilado</label>
+				{% elif examen_forma.nombre.value == 'Detección del gen n-MYC' %}
+                <label>Ausente</label>
+				{% else %}
+				<label>Negativo</label>
+				{% endif %}
+				{{ examen_forma.resultado.1.tag }}
+				{% endif %} 
+			  </td>
+			  <td>
+			    {% if examen_forma.nombre.value == 'Cuantificación del gen n-MYC' %}
+				{{ examen_forma.tipo }}
+				{% elif examen_forma.nombre.value == 'Detección de Virus Dengue' %}
+				<select id="{{ examen_forma.tipo.auto_id }}" name="{{ examen_forma.tipo.html_name }}" class="campo" disabled="disabled" onchange="validar(this)" style="width: 300px">
+				  {% if examen_forma.tipo.value == "" %}
+				  <option selected="selected">----</option>
+				  {% else %}
+				  <option>----</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Dengue 1" %}
+				  <option selected="selected">Dengue 1</option>
+				  {% else %}
+				  <option>Dengue 1</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Dengue 2" %}
+				  <option selected="selected">Dengue 2</option>
+				  {% else %}
+				  <option>Dengue 2</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Dengue 3" %}
+				  <option selected="selected">Dengue 3</option>
+				  {% else %}
+				  <option>Dengue 3</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Dengue 4" %}
+				  <option selected="selected">Dengue 4</option>
+				  {% else %}
+				  <option>Dengue 4</option>
+				  {% endif %}
+				</select>
+				{% elif examen_forma.nombre.value == 'Detección del Virus Papiloma Humano' %}
+				<select id="{{ examen_forma.tipo.auto_id }}" name="{{ examen_forma.tipo.html_name }}" class="campo" disabled="disabled" onchange="validar(this)" style="width: 300px">
+				  {% if examen_forma.tipo.value == "" %}
+				  <option selected="selected">----</option>
+				  {% else %}
+				  <option>----</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "6" %}
+				  <option selected="selected">6</option>
+				  {% else %}
+				  <option>6</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "11" %}
+				  <option selected="selected">11</option>
+				  {% else %}
+				  <option>11</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "16" %}
+				  <option selected="selected">16</option>
+				  {% else %}
+				  <option>16</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "18" %}
+				  <option selected="selected">18</option>
+				  {% else %}
+				  <option>18</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "26" %}
+				  <option selected="selected">26</option>
+				  {% else %}
+				  <option>26</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "31" %}
+				  <option selected="selected">31</option>
+				  {% else %}
+				  <option>31</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "33" %}
+				  <option selected="selected">33</option>
+				  {% else %}
+				  <option>33</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "35" %}
+				  <option selected="selected">35</option>
+				  {% else %}
+				  <option>35</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "39" %}
+				  <option selected="selected">39</option>
+				  {% else %}
+				  <option>39</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "45" %}
+				  <option selected="selected">45</option>
+				  {% else %}
+				  <option>45</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "51" %}
+				  <option selected="selected">51</option>
+				  {% else %}
+				  <option>51</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "52" %}
+				  <option selected="selected">52</option>
+				  {% else %}
+				  <option>52</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "53" %}
+				  <option selected="selected">53</option>
+				  {% else %}
+				  <option>53</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "56" %}
+				  <option selected="selected">56</option>
+				  {% else %}
+				  <option>56</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "58" %}
+				  <option selected="selected">58</option>
+				  {% else %}
+				  <option>58</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "59" %}
+				  <option selected="selected">59</option>
+				  {% else %}
+				  <option>59</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "66" %}
+				  <option selected="selected">66</option>
+				  {% else %}
+				  <option>66</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "68" %}
+				  <option selected="selected">68</option>
+				  {% else %}
+				  <option>68</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "73" %}
+				  <option selected="selected">73</option>
+				  {% else %}
+				  <option>73</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "82" %}
+				  <option selected="selected">82</option>
+				  {% else %}
+				  <option>82</option>
+				  {% endif %}
+				</select>
+				{% elif examen_forma.nombre.value == 'Meningitis' %}
+				<select id="{{ examen_forma.tipo.auto_id }}" name="{{ examen_forma.tipo.html_name }}" class="campo" disabled="disabled" onchange="validar(this)" style="width: 300px">
+				  {% if examen_forma.tipo.value == "" %}
+				  <option selected="selected">----</option>
+				  {% else %}
+				  <option>----</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "HSV-1" %}
+				  <option selected="selected">HSV-1</option>
+				  {% else %}
+				  <option>HSV-1</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "HSV-2" %}
+				  <option selected="selected">HSV-2</option>
+				  {% else %}
+				  <option>HSV-2</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "VZV (HHV3)" %}
+				  <option selected="selected">VZV (HHV3)</option>
+				  {% else %}
+				  <option>VZV (HHV3)</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "EBV (HHV4)" %}
+				  <option selected="selected">EBV (HHV4)</option>
+				  {% else %}
+				  <option>EBV (HHV4)</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "CMV (HHV5)(CE0086)" %}
+				  <option selected="selected">CMV (HHV5)(CE0086)</option>
+				  {% else %}
+				  <option>CMV (HHV5)(CE0086)</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "HHV6" %}
+				  <option selected="selected">HHV6</option>
+				  {% else %}
+				  <option>HHV6</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Enterovirus" %}
+				  <option selected="selected">Enterovirus</option>
+				  {% else %}
+				  <option>Enterovirus</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Streptococcus pneumonia" %}
+				  <option selected="selected">Streptococcus pneumonia</option>
+				  {% else %}
+				  <option>Streptococcus pneumonia</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Neisseria meningitides" %}
+				  <option selected="selected">Neisseria meningitides</option>
+				  {% else %}
+				  <option>Neisseria meningitides</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Haemophilus influenza" %}
+				  <option selected="selected">Haemophilus influenza</option>
+				  {% else %}
+				  <option>Haemophilus influenza</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Listeria monocytogenes" %}
+				  <option selected="selected">Listeria monocytogenes</option>
+				  {% else %}
+				  <option>Listeria monocytogenes</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Group B Streptococcus (Streptococcus agalactiae)" %}
+				  <option selected="selected">Group B Streptococcus (Streptococcus agalactiae)</option>
+				  {% else %}
+				  <option>Group B Streptococcus (Streptococcus agalactiae)</option>
+				  {% endif %}
+				</select>
+				{% elif examen_forma.nombre.value == 'Diarrea por patógenos' %}
+				<select id="{{ examen_forma.tipo.auto_id }}" name="{{ examen_forma.tipo.html_name }}" class="campo" disabled="disabled" onchange="validar(this)" style="width: 300px">
+				  {% if examen_forma.tipo.value == "" %}
+				  <option selected="selected">----</option>
+				  {% else %}
+				  <option>----</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Rotavirus Grupo A (RotV)" %}
+				  <option selected="selected">Rotavirus Grupo A (RotV)</option>
+				  {% else %}
+				  <option>Rotavirus Grupo A (RotV)</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Adenovirus entérico (AdV)" %}
+				  <option selected="selected">Adenovirus entérico (AdV)</option>
+				  {% else %}
+				  <option>Adenovirus entérico (AdV)</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Norovirus GI/GII (NoV-GI/GII)" %}
+				  <option selected="selected">Norovirus GI/GII (NoV-GI/GII)</option>
+				  {% else %}
+				  <option>Norovirus GI/GII (NoV-GI/GII)</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Astrovirus (AstV)" %}
+				  <option selected="selected">Astrovirus (AstV)</option>
+				  {% else %}
+				  <option>Astrovirus (AstV)</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Salmonella spp. (S. bongori, S. enterica)" %}
+				  <option selected="selected">Salmonella spp. (S. bongori, S. enterica)</option>
+				  {% else %}
+				  <option>Salmonella spp. (S. bongori, S. enterica)</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Shigella spp. (S. flexneri, S. boydii, S. sonnei, S. dysenteriae)" %}
+				  <option selected="selected">Shigella spp. (S. flexneri, S. boydii, S. sonnei, S. dysenteriae)</option>
+				  {% else %}
+				  <option>Shigella spp. (S. flexneri, S. boydii, S. sonnei, S. dysenteriae)</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Vibrio spp. (V. cholerae, V.parahaemolyticus, V. vulnificus)" %}
+				  <option selected="selected">Vibrio spp. (V. cholerae, V.parahaemolyticus, V. vulnificus)</option>
+				  {% else %}
+				  <option>Vibrio spp. (V. cholerae, V.parahaemolyticus, V. vulnificus)</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Campylobacter spp. (C. jejuni, C. coli)" %}
+				  <option selected="selected">Campylobacter spp. (C. jejuni, C. coli)</option>
+				  {% else %}
+				  <option>Campylobacter spp. (C. jejuni, C. coli)</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Clostridium difficile Toxin B" %}
+				  <option selected="selected">Clostridium difficile Toxin B</option>
+				  {% else %}
+				  <option>Clostridium difficile Toxin B</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Clostridium perfringens" %}
+				  <option selected="selected">Clostridium perfringens</option>
+				  {% else %}
+				  <option>Clostridium perfringens</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Yersinia enterocolitica" %}
+				  <option selected="selected">Yersinia enterocolitica</option>
+				  {% else %}
+				  <option>Yersinia enterocolitica</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Aeromonas spp. (A. media, A. veronii, A. salmonicida, A. sobria, A. bivalvium, A. hydrophila)" %}
+				  <option selected="selected">Aeromonas spp. (A. media, A. veronii, A. salmonicida, A. sobria, A. bivalvium, A. hydrophila)</option>
+				  {% else %}
+				  <option>Aeromonas spp. (A. media, A. veronii, A. salmonicida, A. sobria, A. bivalvium, A. hydrophila)</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "E. coli O157:H7" %}
+				  <option selected="selected">E. coli O157:H7</option>
+				  {% else %}
+				  <option>E. coli O157:H7</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Verocytotoxin-producing E. coli (VTEC)" %}
+				  <option selected="selected">Verocytotoxin-producing E. coli (VTEC)</option>
+				  {% else %}
+				  <option>Verocytotoxin-producing E. coli (VTEC)</option>
+				  {% endif %}
+				</select>
+				{% elif examen_forma.nombre.value == 'Neumonía' %}
+				<select id="{{ examen_forma.tipo.auto_id }}" name="{{ examen_forma.tipo.html_name }}" class="campo" disabled="disabled" onchange="validar(this)" style="width: 300px">
+				  {% if examen_forma.tipo.value == "" %}
+				  <option selected="selected">----</option>
+				  {% else %}
+				  <option>----</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Streptococcus pneumoniae" %}
+				  <option selected="selected">Streptococcus pneumoniae</option>
+				  {% else %}
+				  <option>Streptococcus pneumoniae</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Haemophilus influenza" %}
+				  <option selected="selected">Haemophilus influenza</option>
+				  {% else %}
+				  <option>Haemophilus influenza</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Chlamydophila pneumoniae (CE0086)" %}
+				  <option selected="selected">Chlamydophila pneumoniae (CE0086)</option>
+				  {% else %}
+				  <option>Chlamydophila pneumoniae (CE0086)</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Legionella pneumophila" %}
+				  <option selected="selected">Legionella pneumophila</option>
+				  {% else %}
+				  <option>Legionella pneumophila</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Bordetella pertussis" %}
+				  <option selected="selected">Bordetella pertussis</option>
+				  {% else %}
+				  <option>Bordetella pertussis</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Mycoplasma pneumoniae" %}
+				  <option selected="selected">Mycoplasma pneumoniae</option>
+				  {% else %}
+				  <option>Mycoplasma pneumoniae</option>
+				  {% endif %}
+				</select>
+				{% elif examen_forma.nombre.value == 'Enfermedad respiratoria viral' %}
+				<select id="{{ examen_forma.tipo.auto_id }}" name="{{ examen_forma.tipo.html_name }}" class="campo" disabled="disabled" onchange="validar(this)" style="width: 300px">
+				  {% if examen_forma.tipo.value == "" %}
+				  <option selected="selected">----</option>
+				  {% else %}
+				  <option>----</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Parainfluenza virus 1" %}
+				  <option selected="selected">Parainfluenza virus 1</option>
+				  {% else %}
+				  <option>Parainfluenza virus 1</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Parainfluenza virus 2" %}
+				  <option selected="selected">Parainfluenza virus 2</option>
+				  {% else %}
+				  <option>Parainfluenza virus 2</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Parainfluenza virus 3" %}
+				  <option selected="selected">Parainfluenza virus 3</option>
+				  {% else %}
+				  <option>Parainfluenza virus 3</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Adenovirus" %}
+				  <option selected="selected">Adenovirus</option>
+				  {% else %}
+				  <option>Adenovirus</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Coronavirus 229E/NL63" %}
+				  <option selected="selected">Coronavirus 229E/NL63</option>
+				  {% else %}
+				  <option>Coronavirus 229E/NL63</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Coronavirus OC43" %}
+				  <option selected="selected">Coronavirus OC43</option>
+				  {% else %}
+				  <option>Coronavirus OC43</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Rhinovirus A/B/C" %}
+				  <option selected="selected">Rhinovirus A/B/C</option>
+				  {% else %}
+				  <option>Rhinovirus A/B/C</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Influenza A virus" %}
+				  <option selected="selected">Influenza A virus</option>
+				  {% else %}
+				  <option>Influenza A virus</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Respiratory syncytial virus A" %}
+				  <option selected="selected">Respiratory syncytial virus A</option>
+				  {% else %}
+				  <option>Respiratory syncytial virus A</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Respiratory syncytial virus B" %}
+				  <option selected="selected">Respiratory syncytial virus B</option>
+				  {% else %}
+				  <option>Respiratory syncytial virus B</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Bocavirus 1/2/3/4" %}
+				  <option selected="selected">Bocavirus 1/2/3/4</option>
+				  {% else %}
+				  <option>Bocavirus 1/2/3/4</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Influenza B virus" %}
+				  <option selected="selected">Influenza B virus</option>
+				  {% else %}
+				  <option>Influenza B virus</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Metapneumovirus" %}
+				  <option selected="selected">Metapneumovirus</option>
+				  {% else %}
+				  <option>Metapneumovirus</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Parainfluenza virus 4" %}
+				  <option selected="selected">Parainfluenza virus 4</option>
+				  {% else %}
+				  <option>Parainfluenza virus 4</option>
+				  {% endif %}
+				  {% if examen_forma.tipo.value == "Enterovirus" %}
+				  <option selected="selected">Enterovirus</option>
+				  {% else %}
+				  <option>Enterovirus</option>
+				  {% endif %}
+				</select>
+				{% endif %}
+			  </td>
+			</tr>
+			<tr>
+			  <td class="error">
+			    <span id="error_{{ examen_forma.nombre.auto_id }}">&nbsp;</span>
+			  </td>
+			  <td align="center" class="error">
+			    <span id="error_{{ examen_forma.resultado.auto_id }}">&nbsp;</span>
+			  </td>
+			  <td class="error">
+			    <span id="error_{{ examen_forma.tipo.auto_id }}">&nbsp;</span>
+			  </td>
+			</tr>
+            {% endfor %}
+		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Introduzca alguna observaci&oacute;n</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td>
+				<label for="id_udm_observaciones">Observaciones</label>
+			  </td>
+			  <td>
+				{{ diagnostico_forma.udm_observaciones }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_diagnostico_forma_udm_observaciones"></span>
+			  </td>
+			</tr>
+			</tr>
+   		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+	<tr>
+	  <td align="center" class="error">
+		{{ diagnostico_forma.non_field_errors }}
+		{{ examenes_forma_set.non_field_errors }}
+	  </td>
+	</tr>
+	<tr>
+	  <td align="center">
+		<input id="boton_salvar" name="boton_salvar" type="button" value="Salvar Informaci&oacute;n" onclick="if (validar()) { this.form.method = 'POST'; this.form.submit() }"/>
+		<input id="boton_cancelar" name="boton_cancelar" type="button" value="Cancelar" onclick="if (confirm('\u00BFDesea cancelar?')) document.location='{% url 'busqueda_diagnostico_udm' %}'"/>
+	  </td>
+	</tr>
+  </table>
+</form>
+{% endblock %}
