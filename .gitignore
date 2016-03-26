@@ -90,3 +90,4 @@ unidaddiagnosticomolecular/forms.pyc
 unidaddiagnosticomolecular/models.pyc
 unidaddiagnosticomolecular/settings/local.pyc
 unidaddiagnosticomolecular/wsgi.pyc
+*.pyc
