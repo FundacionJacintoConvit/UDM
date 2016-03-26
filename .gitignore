@@ -85,3 +85,8 @@ ENV/
 # Spyder project settings
 .spyderproject
 *.pyc
+unidaddiagnosticomolecular/admin.pyc
+unidaddiagnosticomolecular/forms.pyc
+unidaddiagnosticomolecular/models.pyc
+unidaddiagnosticomolecular/settings/local.pyc
+unidaddiagnosticomolecular/wsgi.pyc
