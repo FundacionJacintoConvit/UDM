@@ -1,3 +1,17 @@
 body {
-	background-position: top; margin: 0px; font-family: Arial, Helvetica, verdana; background-image: url("/core/back-2.jpg"); background-repeat: repeat-x; background-color: rgb(232, 232, 232);
+	background-position: top; margin: 0px;
+	font-family: Arial, Helvetica, verdana; background-image: url("/core/back-2.jpg");
+	background-repeat: repeat-x;
+	background-color: rgb(232, 232, 232);
+}
+
+.container{
+  padding-right: 15px;
+  padding-left: 15px;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+.nota{
+    font: normal 11px/14px 'Lucida Grande', Verdana, Helvetica, Arial, sans-serif;
 }

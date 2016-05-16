@@ -101,7 +101,7 @@ pre {
 	white-space: pre-wrap;
 }
 q {
-	quotes: "“" "”" "‘" "’";
+	quotes: "ï¿½" "ï¿½" "ï¿½" "ï¿½";
 }
 small {
 	font-size: 80%;
@@ -189,4 +189,10 @@ textarea {
 }
 table {
 	border-collapse: collapse; border-spacing: 0;
+}
+.tdCustom {
+    font: normal 11px/14px 'Lucida Grande', Verdana, Helvetica, Arial, sans-serif;
+    text-decoration: none;
+    font-weight: bold;
+    color: #5B80B2;
 }

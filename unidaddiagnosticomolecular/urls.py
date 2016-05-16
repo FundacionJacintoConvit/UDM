@@ -5,7 +5,9 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 from django.views.generic.base import TemplateView, RedirectView
 
-from unidaddiagnosticomolecular.views import IndiceView, BusquedaDiagnosticoMedicoView, BusquedaDiagnosticoPatologoView, BusquedaDiagnosticoUdmView, SalvarDiagnoticoMedicoView, SalvarDiagnoticoPatologoView, SalvarDiagnoticoUdmView, EliminarDiagnosticoView, GenerarReporteView
+from unidaddiagnosticomolecular.views import IndiceView, BusquedaDiagnosticoMedicoView, BusquedaDiagnosticoPatologoView, \
+    BusquedaDiagnosticoUdmView, SalvarDiagnoticoMedicoView, SalvarDiagnoticoPatologoView, SalvarDiagnoticoUdmView, EliminarDiagnosticoView,\
+    GenerarReporteView, ventanaPacienteView, BusquedaView, HistoricoCambioPacienteView
 
 admin.autodiscover()
 
@@ -26,4 +28,8 @@ urlpatterns = patterns('',
     url(r'^plataforma_no_disponible$', TemplateView.as_view(template_name='plataforma_no_disponible.html')),
     url(r'^mantenimiento$', TemplateView.as_view(template_name='mantenimiento.html')),
     url(r'^seguridad$', TemplateView.as_view(template_name='seguridad.html')),
+
+    url(r'^ventana_paciente/(?P<pk>\w+|)$', ventanaPacienteView.as_view(), name='ventana_paciente'),
+    url(r'^busqueda', BusquedaView.as_view(), name='busqueda'),
+    url(r'^historico_cambio_paciente/(?P<pk>\w+|)$', HistoricoCambioPacienteView.as_view(), name='historico_cambio_paciente'),
 )

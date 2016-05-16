@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% load render_table from django_tables2 %}
+{% block titulo %}B&uacute;squeda{% endblock %}
+{% block cargar %}
+<script type="text/javascript">
+function cargar() {
+{% if request.GET.mensaje != null %}
+alert('{{ request.GET.mensaje }}');
+{% endif %}
+}
+
+function nuevoPaciente(campo) {
+    campo.form.action = '{% url 'ventana_paciente' '' %}';
+    campo.form.method = 'GET';
+	campo.form.submit();
+}
+
+function editarPaciente(campo) {
+    var ids = document.getElementsByName('id'), indice, id;
+  
+    for (indice = 0; indice < ids.length; indice++) {
+        if (ids[indice].checked){
+            id = ids[indice].value;
+        }
+    }
+    if (id != null) {
+        campo.form.action = '{% url 'ventana_paciente' '' %}' + id;
+        campo.form.method = 'GET';
+	    campo.form.submit();
+    } else {
+	    alert('Debe seleccionar un paciente');
+	}
+}
+
+function consultarHistoricoCambioPaciente(campo){
+	var ids = document.getElementsByName('id'), indice, id;
+
+    for (indice = 0; indice < ids.length; indice++) {
+        if (ids[indice].checked){
+            id = ids[indice].value;
+        }
+    }
+    if (id != null) {
+    	campo.form.action = '{% url 'historico_cambio_paciente' '' %}'+ id;
+        campo.form.method = 'GET';
+	    campo.form.submit();
+    } else {
+	    alert('Debe seleccionar un paciente');
+	}
+}
+
+</script>
+{% endblock %}
+{% block contenido %}
+   <table border="0" cellpadding="2" cellspacing="2" width="100%">
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Introduzca alg&uacute;n par&aacute;metro de b&uacute;squeda y presione el bot&oacute;n buscar</legend>
+		  <form id="busqueda_paciente" name="busqueda_paciente" action="{% url 'busqueda' %}" method="get">
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+	  	    <tr>
+		      <td width="15%">
+				<label for="id_buscar">Buscar</label>
+			  </td>
+			  <td width="70%">
+				<input class="campo" id="id_busqueda" name="busqueda" type="text" size="80"/>
+			  </td>
+			  <td width="15%">
+				<input class="campo" name="buscar" type="button" value="Buscar paciente registrado" onclick="this.form.submit()"/>
+			  </td>
+			</tr>
+			<tr>
+				<td>
+					&nbsp;
+				</td>
+				<td class="error" colspan="2">
+			    	<span id="error_busqueda"></span>
+			  	</td>
+			</tr>
+			<tr>
+			  <td colspan="3">
+				<div class="container nota">Par&aacute;metros de b&uacute;squeda: n&uacute;mero de historia, identificaci&oacute;n ( C.I. / Pasaporte ), partida de nacimiento, nombre, apellido, identificaci&oacute;n del representante y n&uacute;mero de hijo del representante</div>
+			  </td>
+			</tr>
+			<tr>
+				<td>
+					&nbsp;
+				</td>
+			</tr>
+		  </table>
+		 </form>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Seleccione para realizar una operaci&oacute;n</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+	  	    <tr>
+		      <td class="container">
+				{% render_table tabla %}
+			  </td>
+			</tr>
+	  	    <tr>
+		      <td>
+				  &nbsp;
+			    <form id="salvar_paciente" name="salvar_paciente" action="{% url 'ventana_paciente' '' %}" method="get">
+				<input class="campo" name="nuevo" type="button" value="Ingresar nuevo paciente" onclick="nuevoPaciente(this)"/>
+				<input class="campo" name="editar" type="button" value="Editar paciente" onclick="editarPaciente(this)"/>
+				<input class="campo" name="consultar" type="button" value="Historico de cambios" onclick="consultarHistoricoCambioPaciente(this)"/>
+				</form>
+			  </td>
+			</tr>
+		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+  </table>
+{% endblock %}

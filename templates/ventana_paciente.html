@@ -1,0 +1,1397 @@
+{% extends "base.html" %}
+{% block titulo %}Salvar Paciente{% endblock %}
+{% block cargar %}
+<script type="text/javascript">
+var idFechaNacimientoCalendario, idRepresentFechaNacimientoCalendario;
+
+function cargar() {
+    idFechaNacimientoCalendario = new Epoch('idFechaNacimientoCalendario', 'popup', document.getElementById('id_fecha_nacimiento'), false);
+    idRepresentFechaNacimientoCalendario = new Epoch('idRepresentFechaNacimientoCalendario', 'popup', document.getElementById('id_represent_fecha_nacimiento'), false);
+
+	{% if pk and paciente_forma.tipo_identificacion.value == null %}
+	document.getElementById('no_tiene_id').checked = true;
+	{% endif %}
+	pacienteTieneIdentificacion();
+	noTieneIdentificacion();
+	cambiarFamiliarAntecedente();
+	cambiarAntecedentesPresente();
+
+	{% for error in paciente_forma.non_field_errors %}
+	alert('{{ error }}');
+	{% endfor %}
+	{% for error in diagnostico_forma.non_field_errors %}
+	alert('{{ error }}');
+	{% endfor %}
+}
+
+function pacienteTieneIdentificacion(){
+
+	{% if pk and paciente_forma.tipo_identificacion.value != null %}
+	document.getElementById('no_tiene_id').checked = false;
+	document.getElementById('no_tiene_id').disabled = true;
+	{% endif %}
+
+}
+
+function tieneIdentificacion(campo) {
+    if (campo.value.length > 0) {
+	    document.getElementById('no_tiene_id').checked = false;
+	}
+}
+
+function tieneTipoIdentificacion(campo) {
+    if (campo.selectedIndex > 0) {
+	    document.getElementById('no_tiene_id').checked = false;
+	}
+}
+
+function noTieneIdentificacion() {
+    var forma = document.getElementById('salvar_paciente');
+	var campo_no_tiene = document.getElementById('no_tiene_id');
+
+    if (campo_no_tiene.checked) {
+	    document.getElementById('id_tipo_identificacion').selectedIndex = 0;
+		document.getElementById('id_tipo_identificacion').disabled = true;
+		document.getElementById('id_identificacion').value = null;
+		document.getElementById('id_identificacion').disabled = true;
+		document.getElementById('id_partida_nacimiento').disabled = false;
+	    document.getElementById('id_represent_nombre_primero').disabled = false;
+	    document.getElementById('id_represent_nombre_segundo').disabled = false;
+	    document.getElementById('id_represent_apellido_primero').disabled = false;
+	    document.getElementById('id_represent_apellido_segundo').disabled = false;
+	    document.getElementById('id_represent_tipo_identificacion').disabled = false;
+		document.getElementById('id_represent_identificacion').disabled = false;
+		document.getElementById('id_represent_numero_hijo').disabled = false;
+	    document.getElementById('id_represent_fecha_nacimiento').disabled = false;
+		document.getElementById('id_represent_sexo').disabled = false;
+		document.getElementById('id_represent_nacionalidad').disabled = false;
+		document.getElementById('id_represent_estado_civil').disabled = false;
+		document.getElementById('id_represent_nivel_estudio').disabled = false;
+	} else {
+	    document.getElementById('id_tipo_identificacion').disabled = false;
+		document.getElementById('id_identificacion').disabled = false;
+		document.getElementById('id_partida_nacimiento').disabled = true;
+		document.getElementById('id_partida_nacimiento').value = null;
+	    document.getElementById('id_represent_nombre_primero').disabled = true;
+	    document.getElementById('id_represent_nombre_primero').value = null;
+	    document.getElementById('id_represent_nombre_segundo').disabled = true;
+	    document.getElementById('id_represent_nombre_segundo').value = null;
+	    document.getElementById('id_represent_apellido_primero').disabled = true;
+	    document.getElementById('id_represent_apellido_primero').value = null;
+	    document.getElementById('id_represent_apellido_segundo').disabled = true;
+	    document.getElementById('id_represent_apellido_segundo').value = null;
+		document.getElementById('id_represent_tipo_identificacion').disabled = true;
+	    document.getElementById('id_represent_tipo_identificacion').selectedIndex = 0;
+		document.getElementById('id_represent_identificacion').disabled = true;
+		document.getElementById('id_represent_identificacion').value = null;
+		document.getElementById('id_represent_numero_hijo').disabled = true;
+		document.getElementById('id_represent_numero_hijo').value = null;
+	    document.getElementById('id_represent_fecha_nacimiento').disabled = true;
+	    document.getElementById('id_represent_fecha_nacimiento').value = null;
+		document.getElementById('id_represent_sexo').disabled = true;
+		document.getElementById('id_represent_sexo').value = null;
+		document.getElementById('id_represent_nacionalidad').disabled = true;
+		document.getElementById('id_represent_nacionalidad').value = null;
+		document.getElementById('id_represent_estado_civil').disabled = true;
+		document.getElementById('id_represent_estado_civil').value = null;
+		document.getElementById('id_represent_nivel_estudio').disabled = true;
+		document.getElementById('id_represent_nivel_estudio').value = null;
+	}
+}
+
+function calcularEdad(campo) {
+    if (campo.value != '') {
+	    var now = new Date(), selected = idFechaNacimientoCalendario.dates[idFechaNacimientoCalendario.dates.length - 1];
+        var years = now.getFullYear() - selected.getFullYear();
+		var months = now.getMonth() - selected.getMonth();
+		var dates = now.getDate() - selected.getDate();
+		if (dates < 0) {
+		    months--;
+		}
+		if (months < 0) {
+		    years--;
+			months += 12;
+		}
+	    document.getElementById('id_edad_anios').value = years;
+		document.getElementById('id_edad_meses').value = months;
+	}
+}
+
+function obtenerInformacion(campo) {
+  campo.form.method = 'get';
+  campo.form.submit();
+}
+
+function cambiarFamiliarAntecedente(campo) {
+  var forma = document.getElementById('salvar_paciente');
+  var campo_tipo_diagnostico_c = obtenerCampo(forma, 'medico_tipo_diagnostico', 'C');
+  var campo_tipo_diagnostico_o = obtenerCampo(forma, 'medico_tipo_diagnostico', 'O');
+  var campo_antecedente_s = obtenerCampo(forma, 'medico_familiar_antecedente', 'True');
+  var campo_antecedente_n = obtenerCampo(forma, 'medico_familiar_antecedente', 'False');
+  var campo_nexo = document.getElementById('id_medico_familiar_nexo');
+  var campo_tipo_enfermedad = document.getElementById('id_medico_familiar_tipo_enfermedad');
+  var campo_tipo_cancer = document.getElementById('id_medico_familiar_tipo_cancer');
+  var campo_enfermedad_otra = document.getElementById('id_medico_familiar_enfermedad_otra');
+  var label_antecedente = document.getElementById('label_medico_familiar_antecedente');
+  var label_nexo = document.getElementById('label_medico_familiar_nexo');
+  var label_enfermedad = document.getElementById('label_medico_familiar_enfermedad');
+  var label_enfermedad_otra = document.getElementById('label_medico_familiar_enfermedad_otra');
+  var valor_enfermedad_otra = '{{ diagnostico_forma.medico_familiar_enfermedad.value|escapejs }}';
+  var option;
+
+  if (campo != null) {
+    campo_tipo_enfermedad.selectedIndex = 0;
+    campo_tipo_cancer.selectedIndex = 0;
+  }
+
+  if (campo_antecedente_s.checked) {
+    label_nexo.innerHTML = '<span class="requerido">*</span>Nexo Familiar';
+	if (campo_tipo_diagnostico_c.checked) {
+		label_enfermedad.innerHTML = '<span class="requerido">*</span>Oncol&oacute;gico';
+        campo_tipo_enfermedad.style.visibility = 'hidden';
+		campo_tipo_cancer.style.visibility = 'visible';
+	} else if (campo_tipo_diagnostico_o.checked) {
+		label_enfermedad.innerHTML = '<span class="requerido">*</span>&iquest;Cu&aacute;l enfermedad?';
+        campo_tipo_enfermedad.style.visibility = 'visible';
+		campo_tipo_cancer.style.visibility = 'hidden';
+	}
+	campo_nexo.style.visibility = 'visible';
+	label_enfermedad_otra.innerHTML = '&nbsp;';
+  } else {
+	campo_nexo.style.visibility = 'hidden';
+    campo_tipo_enfermedad.style.visibility = 'hidden';
+    campo_tipo_cancer.style.visibility = 'hidden';
+    campo_enfermedad_otra.style.visibility = 'hidden';
+    label_nexo.innerHTML = '';
+	label_enfermedad.innerHTML = '';
+	label_enfermedad_otra.innerHTML = '&nbsp;';
+  }
+}
+
+function cambiarAntecedentesPresente() {
+	var indice, longitud, campo1, campo2;
+
+	longitud = parseInt(document.getElementById('id_antecedentes-TOTAL_FORMS').value);
+	for (indice = 0; indice < longitud; indice++) {
+		campo1 = document.getElementById('id_antecedentes-' + indice + '-presente_0');
+		campo2 = document.getElementById('id_antecedentes-' + indice + '-nexo_familiar');
+
+		campo2.disabled = !campo1.checked ? 'disabled' : '';
+	}
+}
+
+function validar(campo) {
+	var forma = document.getElementById('salvar_paciente');
+    var campo1, campo2, campo3, campo4, option, errores = false, indice, longitud;
+
+	if (campo == null) {
+	    document.getElementById('boton_salvar').disabled = true;
+		document.getElementById('boton_cancelar').disabled = true;
+	}
+
+	if (!document.getElementById('no_tiene_id').checked) {
+	    if ((campo == null) || (campo.id == 'id_tipo_identificacion')) {
+    	    campo1 = document.getElementById('id_tipo_identificacion');
+	        if (campo1.selectedIndex == 0) {
+	            document.getElementById('error_paciente_forma_tipo_identificacion').innerHTML = 'Debe seleccionar un tipo de identificaci&oacute;n';
+			    if ((campo == null) && !errores) campo1.focus();
+			    errores = true;
+	        } else {
+	            document.getElementById('error_paciente_forma_tipo_identificacion').innerHTML = '&nbsp;';
+	        }
+		}
+
+	    if ((campo == null) || (campo.id == 'id_identificacion')) {
+			campo1 = document.getElementById('id_identificacion');
+			if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+				document.getElementById('error_paciente_forma_identificacion').innerHTML = 'Debe introducir una identificaci&oacute;n';
+				if ((campo == null) && !errores) campo1.focus();
+				errores = true;
+			} else {
+				document.getElementById('error_paciente_forma_identificacion').innerHTML = '&nbsp;';
+			}
+		}
+    } else {
+		if ((campo == null) || (campo.id == 'id_partida_nacimiento')) {
+			campo1 = document.getElementById('id_partida_nacimiento');
+			if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+				document.getElementById('error_paciente_forma_partida_nacimiento').innerHTML = 'Debe introducir la partida de nacimiento';
+				if ((campo == null) && !errores) campo1.focus();
+				errores = true;
+			} else {
+				document.getElementById('error_paciente_forma_partida_nacimiento').innerHTML = '&nbsp;';
+			}
+		}
+
+		if ((campo == null) || (campo.id == 'id_represent_nombre_primero')) {
+			campo1 = document.getElementById('id_represent_nombre_primero');
+			if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+				document.getElementById('error_paciente_forma_represent_nombre_primero').innerHTML = 'Debe introducir un primer nombre';
+				if ((campo == null) && !errores) campo1.focus();
+				errores = true;
+			} else {
+				document.getElementById('error_paciente_forma_represent_nombre_primero').innerHTML = '&nbsp;';
+			}
+		}
+
+		if ((campo == null) || (campo.id == 'id_represent_nombre_segundo')) {
+			campo1 = document.getElementById('id_represent_nombre_segundo');
+			if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+				document.getElementById('error_paciente_forma_represent_nombre_segundo').innerHTML = 'Debe introducir un segundo nombre';
+				if ((campo == null) && !errores) campo1.focus();
+				errores = true;
+			} else {
+				document.getElementById('error_paciente_forma_represent_nombre_segundo').innerHTML = '&nbsp;';
+			}
+		}
+
+		if ((campo == null) || (campo.id == 'id_represent_apellido_primero')) {
+			campo1 = document.getElementById('id_represent_apellido_primero');
+			if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+				document.getElementById('error_paciente_forma_represent_apellido_primero').innerHTML = 'Debe introducir un primer apellido';
+				if ((campo == null) && !errores) campo1.focus();
+				errores = true;
+			} else {
+				document.getElementById('error_paciente_forma_represent_apellido_primero').innerHTML = '&nbsp;';
+			}
+		}
+
+		if ((campo == null) || (campo.id == 'id_represent_apellido_segundo')) {
+			campo1 = document.getElementById('id_represent_apellido_segundo');
+			if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+				document.getElementById('error_paciente_forma_represent_apellido_segundo').innerHTML = 'Debe introducir un segundo apellido';
+				if ((campo == null) && !errores) campo1.focus();
+				errores = true;
+			} else {
+				document.getElementById('error_paciente_forma_represent_apellido_segundo').innerHTML = '&nbsp;';
+			}
+		}
+
+	    if ((campo == null) || (campo.id == 'id_represent_tipo_identificacion')) {
+    	    campo1 = document.getElementById('id_represent_tipo_identificacion');
+	        if (campo1.selectedIndex == 0) {
+	            document.getElementById('error_paciente_forma_represent_tipo_identificacion').innerHTML = 'Debe seleccionar un tipo de identificaci&oacute;n';
+			    if ((campo == null) && !errores) campo1.focus();
+			    errores = true;
+	        } else {
+	            document.getElementById('error_paciente_forma_represent_tipo_identificacion').innerHTML = '&nbsp;';
+	        }
+		}
+
+	    if ((campo == null) || (campo.id == 'id_represent_identificacion')) {
+			campo1 = document.getElementById('id_represent_identificacion');
+			if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+				document.getElementById('error_paciente_forma_represent_identificacion').innerHTML = 'Debe introducir una identificaci&oacute;n';
+				if ((campo == null) && !errores) campo1.focus();
+				errores = true;
+			} else {
+				document.getElementById('error_paciente_forma_represent_identificacion').innerHTML = '&nbsp;';
+			}
+		}
+
+		if ((campo == null) || (campo.id == 'id_represent_numero_hijo')) {
+			campo1 = document.getElementById('id_represent_numero_hijo');
+			if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+				document.getElementById('error_paciente_forma_represent_numero_hijo').innerHTML = 'Debe introducir el n&uacute;mero de hijo';
+				if ((campo == null) && !errores) campo1.focus();
+				errores = true;
+			} else {
+				document.getElementById('error_paciente_forma_represent_numero_hijo').innerHTML = '&nbsp;';
+			}
+		}
+
+		if ((campo == null) || (campo.id == 'id_represent_fecha_nacimiento')) {
+			campo1 = document.getElementById('id_represent_fecha_nacimiento');
+			if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+				document.getElementById('error_paciente_forma_represent_fecha_nacimiento').innerHTML = 'Debe introducir la fecha de nacimiento';
+				if ((campo == null) && !errores) campo1.focus();
+				errores = true;
+			} else {
+				document.getElementById('error_paciente_forma_represent_fecha_nacimiento').innerHTML = '&nbsp;';
+			}
+		}
+
+		if ((campo == null) || (campo.id == 'id_represent_sexo')) {
+			campo1 = document.getElementById('id_represent_sexo');
+			if (campo1.selectedIndex == 0) {
+				document.getElementById('error_paciente_forma_represent_sexo').innerHTML = 'Debe seleccionar un sexo';
+				if ((campo == null) && !errores) campo1.focus();
+				errores = true;
+			} else {
+				document.getElementById('error_paciente_forma_represent_sexo').innerHTML = '&nbsp;';
+			}
+		}
+
+		if ((campo == null) || (campo.id == 'id_represent_nacionalidad')) {
+			campo1 = document.getElementById('id_represent_nacionalidad');
+			if (campo1.selectedIndex == 0) {
+				document.getElementById('error_paciente_forma_represent_nacionalidad').innerHTML = 'Debe seleccionar una nacionalidad';
+				if ((campo == null) && !errores) campo1.focus();
+				errores = true;
+			} else {
+				document.getElementById('error_paciente_forma_represent_nacionalidad').innerHTML = '&nbsp;';
+			}
+		}
+
+		if ((campo == null) || (campo.id == 'id_represent_estado_civil')) {
+			campo1 = document.getElementById('id_represent_estado_civil');
+			if (campo1.selectedIndex == 0) {
+				document.getElementById('error_paciente_forma_represent_estado_civil').innerHTML = 'Debe seleccionar un estado civil';
+				if ((campo == null) && !errores) campo1.focus();
+				errores = true;
+			} else {
+				document.getElementById('error_paciente_forma_represent_estado_civil').innerHTML = '&nbsp;';
+			}
+		}
+
+		if ((campo == null) || (campo.id == 'id_represent_nivel_estudio')) {
+			campo1 = document.getElementById('id_represent_nivel_estudio');
+			if (campo1.selectedIndex == 0) {
+				document.getElementById('error_paciente_forma_represent_nivel_estudio').innerHTML = 'Debe seleccionar un nivel de estudio';
+				if ((campo == null) && !errores) campo1.focus();
+				errores = true;
+			} else {
+				document.getElementById('error_paciente_forma_represent_nivel_estudio').innerHTML = '&nbsp;';
+			}
+		}
+
+		document.getElementById('error_paciente_forma_tipo_identificacion').innerHTML = '&nbsp;';
+	    document.getElementById('error_paciente_forma_identificacion').innerHTML = '&nbsp;';
+    }
+
+	if ((campo == null) || (campo.id == 'id_nombre_primero')) {
+		campo1 = document.getElementById('id_nombre_primero');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_paciente_forma_nombre_primero').innerHTML = 'Debe introducir un primer nombre';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_nombre_primero').innerHTML = '&nbsp;';
+		}
+    }
+
+	if ((campo == null) || (campo.id == 'id_nombre_segundo')) {
+		campo1 = document.getElementById('id_nombre_segundo');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_paciente_forma_nombre_segundo').innerHTML = 'Debe introducir un segundo nombre';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_nombre_segundo').innerHTML = '&nbsp;';
+		}
+    }
+
+	if ((campo == null) || (campo.id == 'id_apellido_primero')) {
+		campo1 = document.getElementById('id_apellido_primero');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_paciente_forma_apellido_primero').innerHTML = 'Debe introducir un primer apellido';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_apellido_primero').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_apellido_segundo')) {
+		campo1 = document.getElementById('id_apellido_segundo');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_paciente_forma_apellido_segundo').innerHTML = 'Debe introducir un segundo apellido';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_apellido_segundo').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_fecha_nacimiento') || (campo.id == 'id_edad_anios') || (campo.id == 'id_edad_meses')) {
+		campo1 = document.getElementById('id_fecha_nacimiento');
+		campo2 = document.getElementById('id_edad_anios');
+		campo3 = document.getElementById('id_edad_meses');
+		if ((campo1.value.replace(/^\s+|\s+$/g,"").length == 0) && (campo2.value.replace(/^\s+|\s+$/g,"").length == 0) && (campo3.value.replace(/^\s+|\s+$/g,"").length == 0)) {
+			document.getElementById('error_paciente_forma_fecha_nacimiento').innerHTML = 'Debe introducir la fecha de nacimiento o la edad';
+			document.getElementById('error_paciente_forma_edad_anios').innerHTML = '&nbsp;';
+			document.getElementById('error_paciente_forma_edad_meses').innerHTML = '&nbsp;';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else if ((campo1.value.replace(/^\s+|\s+$/g,"").length == 0) && (campo2.value.replace(/^\s+|\s+$/g,"").length != 0) && (campo3.value.replace(/^\s+|\s+$/g,"").length == 0)) {
+			document.getElementById('error_paciente_forma_fecha_nacimiento').innerHTML = '&nbsp;';
+			document.getElementById('error_paciente_forma_edad_anios').innerHTML = '&nbsp;';
+			document.getElementById('error_paciente_forma_edad_meses').innerHTML = 'Debe introducir la edad en meses';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else if ((campo1.value.replace(/^\s+|\s+$/g,"").length == 0) && (campo2.value.replace(/^\s+|\s+$/g,"").length == 0) && (campo3.value.replace(/^\s+|\s+$/g,"").length != 0)) {
+			document.getElementById('error_paciente_forma_edad_anios').innerHTML = 'Debe introducir la edad en a&ntilde;os';
+			document.getElementById('error_paciente_forma_fecha_nacimiento').innerHTML = '&nbsp;';
+			document.getElementById('error_paciente_forma_edad_meses').innerHTML = '&nbsp;';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_fecha_nacimiento').innerHTML = '&nbsp;';
+			document.getElementById('error_paciente_forma_edad_anios').innerHTML = '&nbsp;';
+			document.getElementById('error_paciente_forma_edad_meses').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_sexo')) {
+		campo1 = document.getElementById('id_sexo');
+		if (campo1.selectedIndex == 0) {
+			document.getElementById('error_paciente_forma_sexo').innerHTML = 'Debe seleccionar un sexo';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_sexo').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_nacionalidad')) {
+		campo1 = document.getElementById('id_nacionalidad');
+		if (campo1.selectedIndex == 0) {
+			document.getElementById('error_paciente_forma_nacionalidad').innerHTML = 'Debe seleccionar una nacionalidad';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_nacionalidad').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_estado_civil')) {
+		campo1 = document.getElementById('id_estado_civil');
+		if (campo1.selectedIndex == 0) {
+			document.getElementById('error_paciente_forma_estado_civil').innerHTML = 'Debe seleccionar un estado civil';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_estado_civil').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_nivel_estudio')) {
+		campo1 = document.getElementById('id_nivel_estudio');
+		if (campo1.selectedIndex == 0) {
+			document.getElementById('error_paciente_forma_nivel_estudio').innerHTML = 'Debe seleccionar un nivel de estudio';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_nivel_estudio').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_telefono_local')) {
+		campo1 = document.getElementById('id_telefono_local');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_paciente_forma_telefono_local').innerHTML = 'Debe introducir un tel&eacute;fono local';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_telefono_local').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_telefono_celular1')) {
+		campo1 = document.getElementById('id_telefono_celular1');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_paciente_forma_telefono_celular1').innerHTML = 'Debe introducir un tel&eacute;fono celular 1';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_telefono_celular1').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_calle_avenida')) {
+		campo1 = document.getElementById('id_calle_avenida');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_paciente_forma_calle_avenida').innerHTML = 'Debe introducir una calle / ave';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_calle_avenida').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_sector_barrio_urb')) {
+		campo1 = document.getElementById('id_sector_barrio_urb');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_paciente_forma_sector_barrio_urb').innerHTML = 'Debe introducir un sector / barrio / urb';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_sector_barrio_urb').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_casa_edificio')) {
+		campo1 = document.getElementById('id_casa_edificio');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_paciente_forma_casa_edificio').innerHTML = 'Debe introducir un casa / edificio';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_casa_edificio').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_estado')) {
+		campo1 = document.getElementById('id_estado');
+		if (campo1.selectedIndex == 0) {
+			document.getElementById('error_paciente_forma_estado').innerHTML = 'Debe seleccionar un estado';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_estado').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_ciudad')) {
+		campo1 = document.getElementById('id_ciudad');
+		if (campo1.selectedIndex == 0) {
+			document.getElementById('error_paciente_forma_ciudad').innerHTML = 'Debe seleccionar una ciudad';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_ciudad').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_municipio')) {
+		campo1 = document.getElementById('id_municipio');
+		if (campo1.selectedIndex == 0) {
+			document.getElementById('error_paciente_forma_municipio').innerHTML = 'Debe seleccionar un municipio';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_municipio').innerHTML = '&nbsp;';
+		}
+	}
+
+	if ((campo == null) || (campo.id == 'id_parroquia')) {
+		campo1 = document.getElementById('id_parroquia');
+		if (campo1.selectedIndex == 0) {
+			document.getElementById('error_paciente_forma_parroquia').innerHTML = 'Debe seleccionar una parroquia';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_paciente_forma_parroquia').innerHTML = '&nbsp;';
+		}
+	}
+
+	longitud = parseInt(document.getElementById('id_antecedentes-TOTAL_FORMS').value);
+	for (indice = 0; indice < longitud; indice++) {
+		campo1 = document.getElementById('id_antecedentes-' + indice + '-presente_0');
+		campo2 = document.getElementById('id_antecedentes-' + indice + '-nexo_familiar');
+		if ((campo == null) || (campo.id == 'id_antecedentes-' + indice + '-nexo_familiar')) {
+			if (campo1.checked) {
+				if (campo2.value.replace(/^\s+|\s+$/g,"").length == 0) {
+					document.getElementById('error_id_antecedentes-' + indice + '-nexo_familiar').innerHTML = 'Debe introducir un nombre del nexo familiar';
+					if ((campo == null) && !errores) campo2.focus();
+					errores = true;
+				} else {
+					document.getElementById('error_id_antecedentes-' + indice + '-nexo_familiar').innerHTML = '&nbsp;';
+				}
+			}
+		}
+	}
+
+	if ((campo == null) && errores) {
+	    document.getElementById('boton_salvar').disabled = false;
+		document.getElementById('boton_cancelar').disabled = false;
+	}
+
+	return !errores;
+}
+</script>
+{% endblock %}
+{% block contenido %}
+<form id="salvar_paciente" name="salvar_paciente" action="{% url 'ventana_paciente' pk %}" enctype="multipart/form-data" method="post">
+  {% csrf_token %}
+   <table border="0" cellpadding="2" cellspacing="2" width="100%">
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Informaci&oacute;n del m&eacute;dico</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td>
+				<label for="id_first_name">Primer Nombre</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.first_name }}
+			  </td>
+			  <td>
+				<label for="id_last_name">Segundo Nombre</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.nombre_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_first_name">Primer Apellido</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.last_name }}
+			  </td>
+			  <td>
+				<label for="id_last_name">Segundo Apellido</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.apellido_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_nacionalidad">Nacionalidad</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.nacionalidad }}
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_institucion">Profesión</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.profesion }}
+			  </td>
+			  <td>
+				<label for="id_unidad">Especialización</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.especializacion }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_institucion">Instituci&oacute;n de Procedencia</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.institucion }}
+			  </td>
+			  <td>
+				<label for="id_unidad">Unidad / Departamento</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.unidad }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_telefono">N del MPPS</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.numero_mpps }}
+			  </td>
+			  <td>
+				<label for="id_telefono">N del Colegio</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.numero_colegio }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_telefono">Tel&eacute;fono</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.telefono }}
+			  </td>
+			  <td>
+				<label for="id_telefono">Correo electrónico</label>
+			  </td>
+			  <td>
+				{{ medico_user_forma.email }}
+			  </td>
+			</tr>
+		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Introduzca la informaci&oacute;n del paciente</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+	  	    <tr>
+		      <td width="15%">
+				<label for="id_id">N&uacute;mero de Historia</label>
+			  </td>
+			  <td width="35%">
+			    <input class="campo" id="paciente_pk" name="paciente_pk" type="text" value="{{ paciente_pk }}" size="40" disabled="disabled"/>
+			  </td>
+		      <td width="15%">
+				<label for="id_numero_historia">N de Historia de la Instituci&oacute;n del Convenio</label>
+			  </td>
+			  <td width="35%">
+			    {{ paciente_forma.numero_historia }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+			    <span id="error_paciente_forma_id"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+			    <span id="error_paciente_forma_numero_historia"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_identificacion">C.I. / Pasaporte</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.tipo_identificacion }}
+				{{ paciente_forma.identificacion }}
+			  </td>
+			  <td>
+				<label for="no_tiene_id">No tiene</label>
+			  </td>
+			  <td>
+			    {% if request.GET.no_tiene_id == 'True' or request.POST.no_tiene_id == 'True' %}
+				<input id="no_tiene_id" name="no_tiene_id" value="True" type="checkbox" checked="checked" onchange="noTieneIdentificacion(this)" />
+				{% else %}
+				<input id="no_tiene_id" name="no_tiene_id" value="True" type="checkbox" onchange="noTieneIdentificacion(this)" />
+				{% endif %}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error" colspan="3">
+				<span id="error_paciente_forma_tipo_identificacion"></span>
+				<span id="error_paciente_forma_identificacion"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_partida_nacimiento"><span class="requerido">*</span>Partida de Nacimiento</label>
+			  </td>
+			  <td colspan="3">
+				{{ paciente_forma.partida_nacimiento }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error" colspan="3">
+				<span id="error_paciente_forma_partida_nacimiento"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_nombre_primero"><span class="requerido">*</span>Primer Nombre</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.nombre_primero }}
+			  </td>
+			  <td>
+				<label for="id_nombre_segundo"><span class="requerido">*</span>Segundo Nombre</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.nombre_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_nombre_primero"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_nombre_segundo"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_apellido_primero"><span class="requerido">*</span>Primer Apellido</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.apellido_primero }}
+			  </td>
+			  <td>
+				<label for="id_apellido_segundo"><span class="requerido">*</span>Segundo Apellido</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.apellido_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_apellido_primero"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_apellido_segundo"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_fecha_nacimiento">Fecha de Nacimiento</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.fecha_nacimiento }}
+				<img src="{{ STATIC_URL }}img/calendario.gif" width="18" height="16" border="0" onClick="idFechaNacimientoCalendario.toggle();" class="class-btn"/>
+				<iframe id="iframefecha_nacimiento" scrolling="no" frameborder="0" class="iframe-calendario"></iframe>
+			  </td>
+			  <td>
+				<label for="id_edad_anios"><span class="requerido">*</span>Edad A&ntilde;os</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.edad_anios }}
+				<label for="id_edad_meses"><span class="requerido">*</span>Meses</label>
+				{{ paciente_forma.edad_meses }}
+			  </td>
+     	    </tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_fecha_nacimiento"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_edad_anios"></span>
+                <span id="error_paciente_forma_edad_meses"></span>
+			  </td>
+			</tr>
+	  	    <tr>
+		      <td>
+				<label for="id_sexo"><span class="requerido">*</span>Sexo</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.sexo }}
+			  </td>
+		      <td>
+				<label for="id_nacionalidad"><span class="requerido">*</span>Nacionalidad</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.nacionalidad }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_sexo"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_nacionalidad"></span>
+			  </td>
+			</tr>
+	  	    <tr>
+		      <td>
+				<label for="id_estado_civil"><span class="requerido">*</span>Estado Civil</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.estado_civil }}
+			  </td>
+		      <td>
+				<label for="id_nivel_estudio"><span class="requerido">*</span>Nivel de Estudio</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.nivel_estudio }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_estado_civil"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_nivel_estudio"></span>
+			  </td>
+			</tr>
+		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Introduzca la informaci&oacute;n del representante</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td width="15%">
+				<label for="id_represent_nombre"><span class="requerido">*</span>Primer Nombre</label>
+			  </td>
+			  <td width="35%">
+				{{ paciente_forma.represent_nombre_primero }}
+			  </td>
+			  <td width="15%">
+				<label for="id_represent_apellido"><span class="requerido">*</span>Segundo Nombre</label>
+			  </td>
+			  <td width="35%">
+				{{ paciente_forma.represent_nombre_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_represent_nombre_primero"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_represent_nombre_segundo"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td width="15%">
+				<label for="id_represent_apellido_primero"><span class="requerido">*</span>Primer Apellido</label>
+			  </td>
+			  <td width="35%">
+				{{ paciente_forma.represent_apellido_primero }}
+			  </td>
+			  <td width="15%">
+				<label for="id_represent_apellido_segundo"><span class="requerido">*</span>Segundo Apellido</label>
+			  </td>
+			  <td width="35%">
+				{{ paciente_forma.represent_apellido_segundo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_represent_apellido_primero"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_represent_apellido_segundo"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_represent_identificacion"><span class="requerido">*</span>C.I. / Pasaporte</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.represent_tipo_identificacion }}
+				{{ paciente_forma.represent_identificacion }}
+			  </td>
+			  <td>
+				<label for="id_represent_numero_hijo"><span class="requerido">*</span>N&uacute;mero de Hijo</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.represent_numero_hijo }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_represent_tipo_identificacion"></span>
+				<span id="error_paciente_forma_represent_identificacion"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_represent_numero_hijo"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_represent_fecha_nacimiento"><span class="requerido">*</span>Fecha de Nacimiento</label>
+			  </td>
+			  <td colspan="3">
+				{{ paciente_forma.represent_fecha_nacimiento }}
+				<img src="{{ STATIC_URL }}img/calendario.gif" width="18" height="16" border="0" onClick="idRepresentFechaNacimientoCalendario.toggle();" class="class-btn"/>
+				<iframe id="iframerepresent_fecha_nacimiento" scrolling="no" frameborder="0" class="iframe-calendario"></iframe>
+			  </td>
+     	    </tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error" colspan="3">
+				<span id="error_paciente_forma_represent_fecha_nacimiento"></span>
+			  </td>
+			</tr>
+	  	    <tr>
+		      <td>
+				<label for="id_represent_sexo"><span class="requerido">*</span>Sexo</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.represent_sexo }}
+			  </td>
+		      <td>
+				<label for="id_represent_nacionalidad"><span class="requerido">*</span>Nacionalidad</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.represent_nacionalidad }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_represent_sexo"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_represent_nacionalidad"></span>
+			  </td>
+			</tr>
+	  	    <tr>
+		      <td>
+				<label for="id_represent_estado_civil"><span class="requerido">*</span>Estado Civil</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.represent_estado_civil }}
+			  </td>
+		      <td>
+				<label for="id_represent_nivel_estudio"><span class="requerido">*</span>Nivel de Estudio</label>
+			  </td>
+			  <td>
+				{{ paciente_forma.represent_nivel_estudio }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_represent_estado_civil"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_represent_nivel_estudio"></span>
+			  </td>
+			</tr>
+  		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Introduzca la informaci&oacute;n de contacto</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td width="15%">
+				<label for="id_telefono_local"><span class="requerido">*</span>Tel&eacute;fono Local</label>
+			  </td>
+			  <td width="35%">
+				{{ paciente_forma.telefono_local }}
+			  </td>
+			  <td width="15%">
+				<label for="id_telefono_celular1"><span class="requerido">*</span>Tel&eacute;fono Celular 1</label>
+			  </td>
+			  <td width="35%">
+				{{ paciente_forma.telefono_celular1 }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_telefono_local"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_telefono_celular1"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td width="15%">
+				<label for="id_telefono_celular2">Tel&eacute;fono Celular 2</label>
+			  </td>
+			  <td width="35%">
+				{{ paciente_forma.telefono_celular2 }}
+			  </td>
+			  <td width="15%">
+				<label for="id_correo_electronico">Correo Electr&oacute;nico</label>
+			  </td>
+			  <td width="35%">
+				{{ paciente_forma.correo_electronico }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_telefono_celular2"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_telefono_correo_electronico"></span>
+			  </td>
+			</tr>
+      	  </table>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Introduzca la informaci&oacute;n de direcci&oacute;n</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td width="15%">
+				<label for="id_calle_avenida"><span class="requerido">*</span>Calle / Avenida</label>
+			  </td>
+			  <td width="35%">
+				{{ paciente_forma.calle_avenida }}
+			  </td>
+			  <td width="15%">
+				<label for="id_sector_barrio_urb"><span class="requerido">*</span>Sector / Barrio / Urbanizaci&oacute;n</label>
+			  </td>
+			  <td width="35%">
+				{{ paciente_forma.sector_barrio_urb }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_calle_avenida"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_sector_barrio_urb"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_casa_edificio"><span class="requerido">*</span>Casa / Edificio</label>
+			  </td>
+			  <td colspan="3">
+				{{ paciente_forma.casa_edificio }}
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error" colspan="3">
+				<span id="error_paciente_forma_casa_edificio"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_estado"><span class="requerido">*</span>Estado</label>
+			  </td>
+			  <td>
+				<select id="id_estado" name="id_estado" onchange="obtenerInformacion(this); validar(this)">
+				  <option value="0">----------</option>
+				  {% for estado in estados %}
+				  {% if estado.id == id_estado %}
+				  <option value="{{ estado.id }}" selected="selected">{{ estado.nombre }}</option>
+				  {% else %}
+				  <option value="{{ estado.id }}">{{ estado.nombre }}</option>
+				  {% endif %}
+				  {% endfor %}
+				</select>
+			  </td>
+			  <td>
+				<label for="id_ciudad"><span class="requerido">*</span>Ciudad</label>
+			  </td>
+			  <td>
+				<select id="id_ciudad" name="id_ciudad" onchange="validar(this)">
+				  <option value="0">----------</option>
+				  {% for ciudad in ciudades %}
+				  {% if ciudad.id == id_ciudad %}
+				  <option value="{{ ciudad.id }}" selected="selected">{{ ciudad.nombre }}</option>
+				  {% else %}
+				  <option value="{{ ciudad.id }}">{{ ciudad.nombre }}</option>
+				  {% endif %}
+				  {% endfor %}
+				</select>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_estado"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_ciudad"></span>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				<label for="id_municipio"><span class="requerido">*</span>Municipio</label>
+			  </td>
+			  <td>
+				<select id="id_municipio" name="id_municipio" onchange="obtenerInformacion(this); validar(this)">
+				  <option value="0">----------</option>
+				  {% for municipio in municipios %}
+				  {% if municipio.id == id_municipio %}
+				  <option value="{{ municipio.id }}" selected="selected">{{ municipio.nombre }}</option>
+				  {% else %}
+				  <option value="{{ municipio.id }}">{{ municipio.nombre }}</option>
+				  {% endif %}
+				  {% endfor %}
+				</select>
+			  </td>
+			  <td>
+				<label for="id_parroquia"><span class="requerido">*</span>Parroquia</label>
+			  </td>
+			  <td>
+				<select id="id_parroquia" name="id_parroquia" onchange="validar(this)">
+				  <option value="0">----------</option>
+				  {% for parroquia in parroquias %}
+				  {% if parroquia.id == id_parroquia %}
+				  <option value="{{ parroquia.id }}" selected="selected">{{ parroquia.nombre }}</option>
+				  {% else %}
+				  <option value="{{ parroquia.id }}">{{ parroquia.nombre }}</option>
+				  {% endif %}
+				  {% endfor %}
+				</select>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_municipio"></span>
+			  </td>
+			  <td>
+				&nbsp;
+			  </td>
+			  <td class="error">
+				<span id="error_paciente_forma_parroquia"></span>
+			  </td>
+			</tr>
+   		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Introduzca alg&uacute;na observaci&oacute;n sobre antecedentes familiares</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+			<tr>
+			  <td colspan="2">
+				  {{ antecedentes_forma_set.management_form }}
+				   <table border="0" cellpadding="2" cellspacing="2" width="100%">
+					{% for antecedente_forma in antecedentes_forma_set %}
+					<tr id="fila_{{ antecedente_forma.antecedente.auto_id }}">
+					  <td width="40%">
+						<label id="label_{{ antecedente_forma.antecedente.auto_id }}">
+						{% if antecedente_forma.otro.value == False or antecedente_forma.otro.value == 'False' %}
+						{{ antecedente_forma.antecedente.value }}
+						{{ antecedente_forma.antecedente.as_hidden }}
+						{% endif %}
+						{% if antecedente_forma.otro.value == True or antecedente_forma.otro.value == 'True' %}
+						Otro
+						{{ antecedente_forma.antecedente }}
+						{% endif %}
+						</label>
+						{{ antecedente_forma.id }}
+						{{ antecedente_forma.otro }}
+						{{ antecedente_forma.orden }}
+						{{ antecedente_forma.tipo_antecedente }}
+					  </td>
+					  <td width="60%">
+					    <table border="0" cellpadding="2" cellspacing="2">
+						  <tr>
+						    <td>
+						      {{ antecedente_forma.presente.0 }}
+						      <label>Nexo Familiar</label>
+						      {{ antecedente_forma.nexo_familiar }}
+							</td>
+						  </tr>
+						  <tr>
+						    <td>
+						      {{ antecedente_forma.presente.1 }}
+							</td>
+						  </tr>
+						 </table>
+					  </td>
+					</tr>
+					<tr>
+					  <td width="20%">
+					  </td>
+                      <td width="80%" class="error">
+					    <span id="error_{{ antecedente_forma.nexo_familiar.auto_id }}">&nbsp;</span>
+					  </td>
+					</tr>
+					{% endfor %}
+				  </table>
+			  </td>
+			</tr>
+		   <tr>
+			  <td>
+				<label for="id_familiares_observaciones">Observaciones</label>
+			  </td>
+			</tr>
+			<tr>
+			  <td>
+				{{ paciente_forma.familiares_observaciones }}
+			  </td>
+			</tr>
+   		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+	<tr>
+	  <td align="center">
+		<input id="boton_salvar" name="boton_salvar" type="button" value="Salvar Informaci&oacute;n" onclick="if (validar()) { this.form.method = 'POST'; this.form.submit() }"/>
+		<input id="boton_cancelar" name="boton_cancelar" type="button" value="Cancelar" onclick="if (confirm('\u00BFDesea cancelar?')) document.location='{% url 'busqueda' %}'"/>
+	  </td>
+	</tr>
+  </table>
+</form>
+{% endblock %}

@@ -2,8 +2,14 @@
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from unidaddiagnosticomolecular.models import UDMUser, Ciudad, Estado, Institucion, Unidad, EstadoCivil, NivelEstudio, TipoEnfermedad, TipoCancer, TipoAntecedente, TipoEstudio, TipoExamen
-from unidaddiagnosticomolecular.forms import UDMUserCreationForm, UDMUserChangeForm, CiudadForm, EstadoForm, InstitucionForm, UnidadForm, EstadoCivilForm, NivelEstudioForm, TipoEnfermedadForm, TipoCancerForm, TipoAntecedenteForm, TipoEstudioForm, TipoExamenForm
+from unidaddiagnosticomolecular.models import UDMUser, Ciudad, Estado, Institucion, Unidad, EstadoCivil, NivelEstudio, TipoEnfermedad, TipoCancer, TipoAntecedente, TipoEstudio, TipoExamen, Parroquia, Municipio
+from unidaddiagnosticomolecular.forms import UDMUserCreationForm, UDMUserChangeForm, CiudadForm, EstadoForm, InstitucionForm, UnidadForm, EstadoCivilForm, NivelEstudioForm, TipoEnfermedadForm, TipoCancerForm, TipoAntecedenteForm, TipoEstudioForm, TipoExamenForm, ParroquiaForm, MunicipioForm
+
+class ParroquiaAdmin(admin.ModelAdmin):
+    form = ParroquiaForm
+
+class MunicipioAdmin(admin.ModelAdmin):
+    form = MunicipioForm
 
 class CiudadAdmin(admin.ModelAdmin):
     form = CiudadForm
@@ -48,7 +54,9 @@ class UDMUserAdmin(UserAdmin):
         ( 'Información del Convenio', { 'fields': ( 'institucion', 'unidad', 'unidad_fecha_inicio', 'unidad_fecha_fin', 'unidad_director', 'unidad_director_telefono', 'unidad_director_email' ) } ),
         ( 'Información de Permisos', { 'fields': ( 'is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions' ) } ), 
     )
-	
+
+admin.site.register(Parroquia, ParroquiaAdmin)
+admin.site.register(Municipio, MunicipioAdmin)
 admin.site.register(Ciudad, CiudadAdmin)
 admin.site.register(Estado, EstadoAdmin)
 admin.site.register(Institucion, InstitucionAdmin)

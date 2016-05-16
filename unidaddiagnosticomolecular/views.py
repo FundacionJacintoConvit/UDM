@@ -26,7 +26,7 @@ from django.forms.models import modelformset_factory
 
 from commons.convit import constants
 from commons.convit.decorators import ConvitLoggerExceptionDecorator
-from unidaddiagnosticomolecular.models import Paciente, Diagnostico, DiagnosticoExamen, DiagnosticoSintoma, DiagnosticoEstudio, DiagnosticoAntecedente, DiagnosticoTrasladoMuestra, Ciudad, Estado, TipoAntecedente, TipoEstudio, TipoExamen
+from unidaddiagnosticomolecular.models import Paciente, Diagnostico, DiagnosticoExamen, DiagnosticoSintoma, DiagnosticoEstudio, DiagnosticoAntecedente, DiagnosticoTrasladoMuestra, Ciudad, Estado, TipoAntecedente, TipoEstudio, TipoExamen, HistoricoCambio, Parroquia, Municipio, EstadoCivil, NivelEstudio, UDMUser
 from unidaddiagnosticomolecular.forms import PacienteForm, PacienteMostrarForm, DiagnosticoMedicoForm, DiagnosticoPatologoForm, DiagnosticoUDMForm, DiagnosticoExamenForm, DiagnosticoSintomaForm, DiagnosticoEstudioForm, DiagnosticoExamenForm, DiagnosticoAntecedenteForm, DiagnosticoTrasladoMuestraForm, UDMUserForm, DiagnosticoExamenFormSet, DiagnosticoSintomaFormSet, DiagnosticoEstudioFormSet, DiagnosticoExamenFormSet, DiagnosticoAntecedenteFormSet, DiagnosticoTrasladoMuestraFormSet
 
 logger = logging.getLogger(__name__)
@@ -41,7 +41,68 @@ class LinkDateTimeColumn(LinkColumn):
             value = value.strftime(self.format)
 
         return super(LinkDateTimeColumn, self).render(value, record, bound_column)
-		
+
+class HistoricoCambiosTable(Table):
+    """
+        Clase que representa una tabla HTML que lista los pacientes.
+
+    	Fecha: La columna de la fecha de la modificacion.
+    	Campo_Modificado: La columna del campo modificado.
+        Valor_Anterior: La columna del valor anterior.
+        Valor_Actual: La columna del valor actual.
+    	Medico: La columna del nombre del medico.
+        """
+
+    Fecha = TemplateColumn(template_code='<label class="tdCustom">{{record.fecha }} </label>')
+    Campo_Modificado = TemplateColumn(template_code='<label class="tdCustom">{{record.campo_modificado }} </label>')
+    Valor_Anterior = TemplateColumn(template_code='<label class="tdCustom">{{record.valor_anterior }} </label>')
+    Valor_Actual = TemplateColumn(template_code='<label class="tdCustom">{{record.valor_actual }} </label>')
+    Medico = TemplateColumn(template_code='<label class="tdCustom">{{record.medico }} </label>')
+
+    class Meta(object):
+        """
+        Clase meta de la clase DiagnosticoMedicoTable.
+
+        model: La clase modelo.
+        attrs: Los atributos específicos de la tabla.
+        fields: Los campos a mostrar.
+        """
+
+        attrs = {'class': 'paleblue', 'width': '100%'}
+
+class PacientesTable(Table):
+    """
+    Clase que representa una tabla HTML que lista los pacientes.
+
+	numero_historia: La columna número de historia.
+	partida_nacimiento: LA columna partida de nacimiento
+	identificacion: La columna cedula.
+    nombre: La columna nombre.
+    apellido: La columna apellido.
+	ciudad: La columna ciudad.
+	estado: La columna estado.
+    """
+
+    seleccionar = TemplateColumn(template_code='<input name="id" type="radio" value="{{ record.paciente_id }}" />')
+    Numero_de_Historia = TemplateColumn(template_code='<label class="tdCustom">{{record.paciente_id }} </label>')
+    Partida_de_Nacimiento = TemplateColumn(template_code='<label class="tdCustom">{{record.partida_nacimiento }} </label>')
+    identificacion = TemplateColumn(template_code='<label class="tdCustom">{{record.identificacion }} </label>')
+    Nombre = TemplateColumn(template_code='<label class="tdCustom">{{record.nombre }} </label>')
+    Apellido = TemplateColumn(template_code='<label class="tdCustom">{{record.apellido }} </label>')
+    Ciudad = TemplateColumn(template_code='<label class="tdCustom">{{record.ciudad }} </label>')
+    Estado = TemplateColumn(template_code='<label class="tdCustom">{{record.estado }} </label>')
+
+    class Meta(object):
+        """
+        Clase meta de la clase DiagnosticoMedicoTable.
+
+        model: La clase modelo.
+        attrs: Los atributos específicos de la tabla.
+        fields: Los campos a mostrar.
+        """
+
+        attrs = { 'class': 'paleblue', 'width': '100%' }
+
 class DiagnosticoMedicoTable(Table):
     """
     Clase que representa una tabla HTML que lista los diagnósticos.
@@ -168,11 +229,11 @@ class IndiceView(View):
         """
 
         if request.user.has_perms(( 'unidaddiagnosticomolecular.diagnostico_medico', )):
-            return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda_diagnostico_medico')
+            return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda')
         elif request.user.has_perms(( 'unidaddiagnosticomolecular.diagnostico_patologo', )):
-            return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda_diagnostico_patologo')
+            return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda')
         elif request.user.has_perms(( 'unidaddiagnosticomolecular.diagnostico_udm', )):
-            return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda_diagnostico_udm')
+            return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda')
         else:
             return HttpResponseRedirect(settings.URL_PREFIX + '/login')
 
@@ -960,3 +1021,620 @@ class GenerarReporteView(View):
         c.save()
 			
         return response
+
+class ventanaPacienteView(View):
+    """
+    Clase Vista que salva un paciente.
+
+    template_name: Nombre de la plantilla.
+    """
+
+    template_name = 'ventana_paciente.html'
+
+#    @ConvitLoggerExceptionDecorator(permisos='unidaddiagnosticomolecular.diagnostico_medico', logger=logger)
+    def get(self, request, pk, *args, **kwargs):
+        """
+        Método get que crea o consulta un diagnóstico.
+
+        Args:
+            request: El objeto HTTP Request.
+            pk: El identificador.
+
+        Returns:
+            El objeto HTTP Response.
+        """
+
+        if len(request.GET.items()) > 0:
+            antecedentes_forma_set = DiagnosticoAntecedenteFormSet(request.GET, prefix='antecedentes')
+            paciente = Paciente()
+            paciente_forma = PacienteForm(request.GET)
+            id_estado = int(request.GET.get('id_estado', '0'))
+            id_ciudad = int(request.GET.get('id_ciudad', '0'))
+            id_parroquia = int(request.GET.get('id_parroquia', '0'))
+            id_municipio = int(request.GET.get('id_municipio', '0'))
+        elif not pk:
+            paciente = Paciente()
+            paciente_forma = PacienteForm()
+            antecedentes = []
+            orden = 0
+            for tipo_antecedente in TipoAntecedente.objects.all():
+                antecedentes.append({ 'presente': None, 'otro': False, 'tipo_antecedente': tipo_antecedente, 'antecedente': tipo_antecedente.nombre, 'orden': orden })
+                orden = orden + 1
+            antecedentes.append({ 'presente': None, 'otro': True, 'orden': orden })
+            antecedentes_forma_set = modelformset_factory(DiagnosticoAntecedente, form=DiagnosticoAntecedenteForm, extra=len(antecedentes))(prefix='antecedentes', queryset=DiagnosticoAntecedente.objects.none(), initial=antecedentes)
+            id_estado = 0
+            id_ciudad = 0
+            id_parroquia = 0
+            id_municipio = 0
+        else:
+            paciente = Paciente.objects.get(id=pk)
+            id_estado = paciente.ciudad.estado.id
+            id_ciudad = paciente.ciudad.id
+            id_parroquia = paciente.parroquia.id
+            id_municipio = paciente.parroquia.municipio.id
+            paciente_forma = PacienteForm(instance=paciente)
+            antecedentes_forma_set = DiagnosticoAntecedenteFormSet(prefix='antecedentes',
+                                                                   queryset=DiagnosticoAntecedente.objects.filter(
+                                                                       paciente__id=pk).order_by('orden'))
+
+        return render(request, self.template_name,
+                          {'paciente_forma': paciente_forma, 'antecedentes_forma_set': antecedentes_forma_set,
+                           'medico_user_forma': UDMUserForm(instance=request.user, prefix='medico'),
+                           'estados': Estado.objects.all().order_by('nombre'),
+                           'ciudades': Ciudad.objects.filter(estado_id=id_estado).order_by('nombre'),
+                           'municipios': Municipio.objects.filter(estado_id=id_estado).order_by('nombre'),
+                           'parroquias': Parroquia.objects.filter(municipio_id=id_municipio).order_by('nombre'),
+                           'id_estado': id_estado, 'id_ciudad': id_ciudad, 'id_municipio': id_municipio,
+                           'id_parroquia': id_parroquia, 'pk': pk, 'paciente_pk': (paciente.id if paciente.id else '')})
+
+#    @ConvitLoggerExceptionDecorator(permisos='unidaddiagnosticomolecular.diagnostico_medico', logger=logger)
+    def post(self, request, pk, *args, **kwargs):
+        """
+        Método post que salva un paciente
+
+        Args:
+            request: El objeto HTTP Request.
+            pk: El identificador.
+
+        Returns:
+            El objeto HTTP Response.
+        """
+
+        id_estado = int(request.POST.get('id_estado', '0'))
+        id_ciudad = int(request.POST.get('id_ciudad', '0'))
+        id_municipio = int(request.POST.get('id_municipio', '0'))
+        id_parroquia = int(request.POST.get('id_parroquia', '0'))
+        ciudad = Ciudad.objects.get(id=id_ciudad)
+        parroquia = Parroquia.objects.get(id=id_parroquia)
+
+        try:
+            if (pk != ''):
+                paciente = Paciente.objects.get(id=pk)
+            else:
+                paciente_pk = int(request.POST.get(pk, '0'))
+                paciente = Paciente.objects.get(id=paciente_pk)
+        except Paciente.DoesNotExist:
+            paciente = Paciente()
+        paciente.ciudad = ciudad
+        paciente.parroquia = parroquia
+
+        paciente_forma = PacienteForm(request.POST, instance=paciente)
+        antecedentes_forma_set = DiagnosticoAntecedenteFormSet(request.POST, prefix='antecedentes')
+
+        if paciente_forma.is_valid() and antecedentes_forma_set.is_valid():
+
+            if pk:
+                self.guardar_cambios(pk, request)
+                paciente = Paciente.objects.get(id=pk)
+            else:
+                paciente = Paciente()
+
+            paciente.ciudad = ciudad
+            paciente.parroquia = parroquia
+            paciente_forma = PacienteForm(request.POST, instance=paciente)
+            paciente = paciente_forma.save()
+
+            antecedentes = antecedentes_forma_set.save()
+            for antecedente in antecedentes:
+                antecedente.paciente = paciente
+                antecedente.save()
+
+            if not pk:
+                return HttpResponseRedirect(
+                    settings.URL_PREFIX + '/busqueda?mensaje=Se creó un nuevo diagnóstico con número de historia ' + str(
+                        paciente.id))
+            else:
+                return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda')
+        else:
+            paciente_forma = PacienteForm(request.POST)
+
+        return render(request, self.template_name, {'paciente_forma': paciente_forma, 'antecedentes_forma_set': antecedentes_forma_set,
+                                                    'medico_user_forma': UDMUserForm(instance=request.user, prefix='medico'),
+                                                    'estados': Estado.objects.all().order_by('nombre'),
+                                                    'ciudades': Ciudad.objects.filter(estado_id=id_estado).order_by('nombre'),
+                                                    'municipios': Municipio.objects.filter(estado_id=id_estado).order_by('nombre'),
+                                                    'parroquias': Parroquia.objects.filter(municipio_id=id_municipio).order_by('nombre'),
+                                                    'id_estado': id_estado, 'id_ciudad': id_ciudad, 'id_municipio': id_municipio,
+                                                    'id_parroquia': id_parroquia, 'pk': pk, 'paciente_pk': (paciente.id if paciente.id else '')})
+
+    def guardar_cambios(self, id_paciente_old,request):
+
+        paciente_old = Paciente.objects.get(id=id_paciente_old)
+        fecha = datetime.now()
+
+        id_estado_civil = int(request.POST.get('estado_civil', '0'))
+        estado_civil_new = EstadoCivil.objects.get(id=id_estado_civil)
+        id_nivel_estudio = int(request.POST.get('nivel_estudio', '0'))
+        nivel_estudio_new = NivelEstudio.objects.get(id=id_nivel_estudio)
+
+        id_represent_estado_civil = int(request.POST.get('represent_estado_civil', '0'))
+        if id_represent_estado_civil:
+            represent_estado_civil_new = EstadoCivil.objects.get(id=id_represent_estado_civil)
+        id_represent_nivel_estudio = int(request.POST.get('represent_nivel_estudio', '0'))
+        if id_represent_nivel_estudio:
+            represent_nivel_estudio_new = NivelEstudio.objects.get(id=id_represent_nivel_estudio)
+
+        id_estado = int(request.POST.get('id_estado', '0'))
+        estado_new = Estado.objects.get(id=id_estado)
+        id_ciudad = int(request.POST.get('id_ciudad', '0'))
+        ciudad_new = Ciudad.objects.get(id=id_ciudad)
+        id_municipio = int(request.POST.get('id_municipio', '0'))
+        municipio_new = Municipio.objects.get(id=id_municipio)
+        id_parroquia = int(request.POST.get('id_parroquia', '0'))
+        parroquia_new = Parroquia.objects.get(id=id_parroquia)
+
+        if (request.POST.get('numero_historia') != paciente_old.numero_historia):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'N de Historia de la Institución del Convenio'
+            historicoCambio.valor_anterior = paciente_old.numero_historia
+            historicoCambio.valor_actual = request.POST.get('numero_historia')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('tipo_identificacion') != paciente_old.tipo_identificacion):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Tipo de Identificacion'
+            historicoCambio.valor_anterior = paciente_old.tipo_identificacion
+            historicoCambio.valor_actual = request.POST.get('tipo_identificacion')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('identificacion') is not None and paciente_old.identificacion is not None):
+            if (request.POST.get('identificacion') != paciente_old.identificacion):
+                historicoCambio = HistoricoCambio()
+                historicoCambio.fecha = fecha
+                historicoCambio.campo_modificado = 'Identificacion'
+                historicoCambio.valor_anterior = paciente_old.identificacion
+                historicoCambio.valor_actual = request.POST.get('identificacion')
+                historicoCambio.paciente = paciente_old
+                historicoCambio.usuario = request.user
+                historicoCambio.save()
+
+        if (request.POST.get('partida_nacimiento') is not None and paciente_old.partida_nacimiento is not None):
+            if (request.POST.get('partida_nacimiento') != paciente_old.partida_nacimiento):
+                historicoCambio = HistoricoCambio()
+                historicoCambio.fecha = fecha
+                historicoCambio.campo_modificado = 'Partida de Nacimiento'
+                historicoCambio.valor_anterior = paciente_old.partida_nacimiento
+                historicoCambio.valor_actual = request.POST.get('partida_nacimiento')
+                historicoCambio.paciente = paciente_old
+                historicoCambio.usuario = request.user
+                historicoCambio.save()
+
+        if (request.POST.get('nombre_primero') != paciente_old.nombre_primero):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Primer Nombre'
+            historicoCambio.valor_anterior = paciente_old.nombre_primero
+            historicoCambio.valor_actual = request.POST.get('nombre_primero')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('nombre_segundo') != paciente_old.nombre_segundo):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Segundo Nombre'
+            historicoCambio.valor_anterior = paciente_old.nombre_segundo
+            historicoCambio.valor_actual = request.POST.get('nombre_segundo')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('apellido_primero') != paciente_old.apellido_primero):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Primer Apellido'
+            historicoCambio.valor_anterior = paciente_old.apellido_primero
+            historicoCambio.valor_actual = request.POST.get('apellido_primero')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('apellido_segundo') != paciente_old.apellido_segundo):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Segundo Apellido'
+            historicoCambio.valor_anterior = paciente_old.apellido_segundo
+            historicoCambio.valor_actual = request.POST.get('apellido_segundo')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('fecha_nacimiento') != paciente_old.fecha_nacimiento):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Fecha de Nacimiento'
+            historicoCambio.valor_anterior = paciente_old.fecha_nacimiento
+            historicoCambio.valor_actual = request.POST.get('fecha_nacimiento')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('sexo') != paciente_old.sexo):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Sexo'
+            historicoCambio.valor_anterior = paciente_old.sexo
+            historicoCambio.valor_actual = request.POST.get('sexo')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('nacionalidad') != paciente_old.nacionalidad):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Nacionalidad'
+            historicoCambio.valor_anterior = paciente_old.nacionalidad
+            historicoCambio.valor_actual = request.POST.get('nacionalidad')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (estado_civil_new.nombre != paciente_old.estado_civil.nombre):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Estado Civil'
+            historicoCambio.valor_anterior = paciente_old.estado_civil.nombre
+            historicoCambio.valor_actual = estado_civil_new.nombre
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (nivel_estudio_new.nombre != paciente_old.nivel_estudio.nombre):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Nivel de Estudio'
+            historicoCambio.valor_anterior = paciente_old.nivel_estudio.nombre
+            historicoCambio.valor_actual = nivel_estudio_new.nombre
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('represent_nombre_primero') is not None and paciente_old.represent_nombre_primero is not None):
+            if (request.POST.get('represent_nombre_primero') != paciente_old.represent_nombre_primero):
+                historicoCambio = HistoricoCambio()
+                historicoCambio.fecha = fecha
+                historicoCambio.campo_modificado = 'Representante: Primer Nombre'
+                historicoCambio.valor_anterior = paciente_old.represent_nombre_primero
+                historicoCambio.valor_actual = request.POST.get('represent_nombre_primero')
+                historicoCambio.paciente = paciente_old
+                historicoCambio.usuario = request.user
+                historicoCambio.save()
+
+        if (request.POST.get('represent_nombre_segundo') is not None and paciente_old.represent_nombre_segundo is not None):
+            if (request.POST.get('represent_nombre_segundo') != paciente_old.represent_nombre_segundo):
+                historicoCambio = HistoricoCambio()
+                historicoCambio.fecha = fecha
+                historicoCambio.campo_modificado = 'Representante: Segundo Nombre'
+                historicoCambio.valor_anterior = paciente_old.represent_nombre_segundo
+                historicoCambio.valor_actual = request.POST.get('represent_nombre_segundo')
+                historicoCambio.paciente = paciente_old
+                historicoCambio.usuario = request.user
+                historicoCambio.save()
+
+        if (request.POST.get('represent_apellido_primero') is not None and paciente_old.represent_apellido_primero is not None):
+            if (request.POST.get('represent_apellido_primero') != paciente_old.represent_apellido_primero):
+                historicoCambio = HistoricoCambio()
+                historicoCambio.fecha = fecha
+                historicoCambio.campo_modificado = 'Representante: Primer Apellido'
+                historicoCambio.valor_anterior = paciente_old.represent_apellido_primero
+                historicoCambio.valor_actual = request.POST.get('represent_apellido_primero')
+                historicoCambio.paciente = paciente_old
+                historicoCambio.usuario = request.user
+                historicoCambio.save()
+
+        if (request.POST.get('represent_apellido_segundo') is not None and paciente_old.represent_apellido_segundo is not None):
+            if (request.POST.get('represent_apellido_segundo') != paciente_old.represent_apellido_segundo):
+                historicoCambio = HistoricoCambio()
+                historicoCambio.fecha = fecha
+                historicoCambio.campo_modificado = 'Representante: Segundo Apellido'
+                historicoCambio.valor_anterior = paciente_old.represent_apellido_segundo
+                historicoCambio.valor_actual = request.POST.get('represent_apellido_segundo')
+                historicoCambio.paciente = paciente_old
+                historicoCambio.usuario = request.user
+                historicoCambio.save()
+
+        if (request.POST.get('represent_tipo_identificacion') != paciente_old.represent_tipo_identificacion):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Representante: Tipo Identificación'
+            historicoCambio.valor_anterior = paciente_old.represent_tipo_identificacion
+            historicoCambio.valor_actual = request.POST.get('represent_tipo_identificacion')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('represent_identificacion') is not None and paciente_old.represent_identificacion is not None):
+            if (request.POST.get('represent_identificacion') != paciente_old.represent_identificacion):
+                historicoCambio = HistoricoCambio()
+                historicoCambio.fecha = fecha
+                historicoCambio.campo_modificado = 'Representante: Identificación'
+                historicoCambio.valor_anterior = paciente_old.represent_identificacion
+                historicoCambio.valor_actual = request.POST.get('represent_identificacion')
+                historicoCambio.paciente = paciente_old
+                historicoCambio.usuario = request.user
+                historicoCambio.save()
+
+        if (request.POST.get('represent_numero_hijo') != paciente_old.represent_numero_hijo):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Representante: Número de Hijo'
+            historicoCambio.valor_anterior = paciente_old.represent_numero_hijo
+            historicoCambio.valor_actual = request.POST.get('represent_numero_hijo')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('represent_sexo') != paciente_old.represent_sexo):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Representante: Sexo'
+            historicoCambio.valor_anterior = paciente_old.represent_sexo
+            historicoCambio.valor_actual = request.POST.get('represent_sexo')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('represent_fecha_nacimiento') != paciente_old.represent_fecha_nacimiento):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Representante: Fecha de Nacimiento'
+            historicoCambio.valor_anterior = paciente_old.represent_fecha_nacimiento
+            historicoCambio.valor_actual = request.POST.get('represent_fecha_nacimiento')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('represent_nacionalidad') != paciente_old.represent_nacionalidad):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Representante: Nacionalidad'
+            historicoCambio.valor_anterior = paciente_old.represent_nacionalidad
+            historicoCambio.valor_actual = request.POST.get('represent_nacionalidad')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if id_represent_estado_civil:
+            if (represent_estado_civil_new.nombre != paciente_old.represent_estado_civil.nombre):
+                historicoCambio = HistoricoCambio()
+                historicoCambio.fecha = fecha
+                historicoCambio.campo_modificado = 'Representante: Estado Civil'
+                historicoCambio.valor_anterior = paciente_old.represent_estado_civil.nombre
+                historicoCambio.valor_actual = estado_civil_new.nombre
+                historicoCambio.paciente = paciente_old
+                historicoCambio.usuario = request.user
+                historicoCambio.save()
+
+        if id_represent_nivel_estudio:
+            if (represent_nivel_estudio_new.nombre != paciente_old.represent_nivel_estudio.nombre):
+                historicoCambio = HistoricoCambio()
+                historicoCambio.fecha = fecha
+                historicoCambio.campo_modificado = 'Representante: Nivel de Estudio'
+                historicoCambio.valor_anterior = paciente_old.represent_nivel_estudio.nombre
+                historicoCambio.valor_actual = nivel_estudio_new.nombre
+                historicoCambio.paciente = paciente_old
+                historicoCambio.usuario = request.user
+                historicoCambio.save()
+
+        if (request.POST.get('telefono_local') != paciente_old.telefono_local):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Teléfono Local'
+            historicoCambio.valor_anterior = paciente_old.telefono_local
+            historicoCambio.valor_actual = request.POST.get('telefono_local')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('telefono_celular1') != paciente_old.telefono_celular1):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Teléfono Celular 1'
+            historicoCambio.valor_anterior = paciente_old.telefono_celular1
+            historicoCambio.valor_actual = request.POST.get('telefono_celular1')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('telefono_celular2') != paciente_old.telefono_celular2):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Teléfono Celular 2'
+            historicoCambio.valor_anterior = paciente_old.telefono_celular2
+            historicoCambio.valor_actual = request.POST.get('telefono_celular2')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('correo_electronico') != paciente_old.correo_electronico):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Correo Electrónico'
+            historicoCambio.valor_anterior = paciente_old.correo_electronico
+            historicoCambio.valor_actual = request.POST.get('correo_electronico')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('calle_avenida') != paciente_old.calle_avenida):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Calle / Avenida'
+            historicoCambio.valor_anterior = paciente_old.calle_avenida
+            historicoCambio.valor_actual = request.POST.get('calle_avenida')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('sector_barrio_urb') != paciente_old.sector_barrio_urb):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Sector / Barrio / Urbanización'
+            historicoCambio.valor_anterior = paciente_old.sector_barrio_urb
+            historicoCambio.valor_actual = request.POST.get('sector_barrio_urb')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (request.POST.get('casa_edificio') != paciente_old.casa_edificio):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Casa / Edificio'
+            historicoCambio.valor_anterior = paciente_old.casa_edificio
+            historicoCambio.valor_actual = request.POST.get('casa_edificio')
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (estado_new.nombre != paciente_old.ciudad.estado.nombre):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Estado'
+            historicoCambio.valor_anterior = paciente_old.ciudad.estado.nombre
+            historicoCambio.valor_actual = estado_new.nombre
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (ciudad_new.nombre != paciente_old.ciudad.nombre):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Ciudad'
+            historicoCambio.valor_anterior = paciente_old.ciudad.nombre
+            historicoCambio.valor_actual = estado_new.nombre
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (municipio_new.nombre != paciente_old.parroquia.municipio.nombre):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Municipio'
+            historicoCambio.valor_anterior = paciente_old.parroquia.municipio.nombre
+            historicoCambio.valor_actual = estado_new.nombre
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+        if (parroquia_new.nombre != paciente_old.parroquia.nombre):
+            historicoCambio = HistoricoCambio()
+            historicoCambio.fecha = fecha
+            historicoCambio.campo_modificado = 'Parroquia'
+            historicoCambio.valor_anterior = paciente_old.parroquia.nombre
+            historicoCambio.valor_actual = estado_new.nombre
+            historicoCambio.paciente = paciente_old
+            historicoCambio.usuario = request.user
+            historicoCambio.save()
+
+class BusquedaView(View):
+    """
+    Clase Vista que permite consultar pacientes.
+
+    template_name: Nombre de la plantilla.
+    """
+
+    template_name = 'busqueda.html'
+
+#    @ConvitLoggerExceptionDecorator(permisos='unidaddiagnosticomolecular.diagnostico_medico', logger=logger)
+    def get(self, request, *args, **kwargs):
+        """
+        Método get que consulta clientes.
+
+        Args:
+            request: El objeto HTTP Request.
+
+        Returns:
+            El objeto HTTP Response.
+        """
+
+        busqueda = request.GET.get('busqueda', '')
+        if busqueda == '':
+            pacientes = Paciente.objects.all()
+        else:
+            pacientes = Paciente.objects.filter(Q(identificacion__contains=busqueda) | Q(nombre_primero__contains=busqueda) | Q(nombre_segundo__contains=busqueda)
+                                                | Q(apellido_primero__contains=busqueda) | Q(apellido_segundo__contains=busqueda) | Q(id__contains=busqueda)
+                                                | Q(partida_nacimiento__contains=busqueda) | Q(represent_identificacion__contains=busqueda) | Q(represent_numero_hijo__contains=busqueda))
+        data = []
+        for paciente in pacientes:
+            data.append({'id': paciente.id,
+                         'paciente_id': paciente.id,
+                         'partida_nacimiento': paciente.partida_nacimiento,
+                         'identificacion': paciente.tipo_identificacion + ' ' + paciente.identificacion if paciente.tipo_identificacion else '',
+                         'nombre': (paciente.nombre_primero if paciente.nombre_primero else '') + u' ' + (
+                         paciente.nombre_segundo if paciente.nombre_segundo else ''),
+                         'apellido': (paciente.apellido_primero if paciente.apellido_primero else '') + u' ' + (
+                         paciente.apellido_segundo if paciente.apellido_segundo else ''),
+                         'ciudad': paciente.ciudad.nombre,
+                         'estado': paciente.ciudad.estado.nombre})
+        tabla = PacientesTable(data)
+        RequestConfig(request, paginate={ 'per_page': 5 }).configure(tabla)
+
+        return render(request, self.template_name, { 'tabla': tabla })
+
+class HistoricoCambioPacienteView(View):
+    """
+        Clase Vista que permite consultar los cambios realizados a los campos de un paciente.
+
+        template_name: Nombre de la plantilla.
+        """
+
+    template_name = 'historico_cambio_paciente.html'
+
+#    @ConvitLoggerExceptionDecorator(permisos='unidaddiagnosticomolecular.diagnostico_medico', logger=logger)
+    def get(self, request, pk,  *args, **kwargs):
+        """
+            Método get que consulta los cambios.
+
+            Args:
+                request: El objeto HTTP Request.
+
+            Returns:
+                El objeto HTTP Response.
+            """
+
+        busqueda = request.GET.get('busqueda', '')
+        if busqueda == '':
+            historicoCambios = HistoricoCambio.objects.raw('select * from t_udm_historico_cambio where paciente_id =' + pk)
+        else:
+            historicoCambios = HistoricoCambio.objects.filter((
+                Q(campo_modificado__contains=busqueda) | Q(valor_anterior__contains=busqueda)
+                | Q(valor_actual__contains=busqueda) | Q(usuario__first_name__contains= busqueda)
+                | Q(usuario__last_name__contains=busqueda)), paciente_id=pk)
+        data = []
+        for historicoCambio in historicoCambios:
+            medico = UDMUser.objects.get(id= historicoCambio.usuario.id)
+            data.append({'fecha': historicoCambio.fecha,
+                         'campo_modificado': historicoCambio.campo_modificado,
+                         'valor_anterior': historicoCambio.valor_anterior,
+                         'valor_actual': historicoCambio.valor_actual,
+                         'medico': medico.first_name + ' ' + medico.last_name})
+        tabla = HistoricoCambiosTable(data)
+        RequestConfig(request, paginate={'per_page': 10}).configure(tabla)
+
+        return render(request, self.template_name, {'tabla': tabla, 'pk': pk})
