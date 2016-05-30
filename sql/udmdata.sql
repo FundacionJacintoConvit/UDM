@@ -108,7 +108,8 @@ insert into t_udm_ciudad (id, nombre, estado_id) values (69, 'Porlamar', 1180);
 insert into t_udm_ciudad (id, nombre, estado_id) values (70, 'Los Puertos de Altagracia', 1121);
 insert into t_udm_ciudad (id, nombre, estado_id) values (71, 'La Guaira', 1060);
 
-insert into t_udm_institucion (id, nombre) values (1, 'J.M. de los Ríos');
+insert into t_udm_institucion (id, nombre) values (1, 'Hospital de Niños JM de los Ríos');
+insert into t_udm_institucion (id, nombre) values (2, 'Fundación Jacinto Convit');
 
 insert into t_udm_estado_civil (nombre) values ('Soltero');
 insert into t_udm_estado_civil (nombre) values ('Casado');

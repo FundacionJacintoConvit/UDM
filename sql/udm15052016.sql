@@ -582,6 +582,7 @@ NOMBRE_SEGUNDO       VARCHAR(255)         null,
 APELLIDO_SEGUNDO     VARCHAR(255)         null,
 NACIONALIDAD         CHAR(1)              null,
 CEDULA_PASAPORTE     VARCHAR(255)         null,
+FECHA_NACIMIENTO     DATE                 null,
 EDAD                 INTEGER              null,
 SEXO                 CHAR(1)              null,
 PROFESION            VARCHAR(255)         null,
@@ -596,6 +597,9 @@ UNIDAD_DIRECTOR      VARCHAR(255)         null,
 UNIDAD_DIRECTOR_TELEFONO VARCHAR(255)         null,
 UNIDAD_DIRECTOR_EMAIL VARCHAR(255)         null,
 UNIDAD_ID            INT8                 null,
+FECHA_ULT_REEST_CLAVE DATE				  null,
+IS_CLAVE_CADUCABLE	  BOOL				  null,
+CODIGO_CAMBIO_CLAVE	  VARCHAR(255)		  null,
 constraint PK_T_UDM_USUARIO primary key (ID)
 );
 

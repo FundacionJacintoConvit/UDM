@@ -645,7 +645,6 @@ class DiagnosticoTrasladoMuestraForm(ModelForm):
             'orden': HiddenInput(attrs={ 'class': 'campo' }),
         }
 
-<<<<<<< HEAD
 class UDMRegistroUserForm(ModelForm): #modelFomr
     def clean_username(self):
         username = self.cleaned_data["username"]
@@ -693,7 +692,6 @@ class UDMRegistroUserForm(ModelForm): #modelFomr
             'email': 'Correo electrónico',
         }
 
-=======
 class MunicipioForm(ModelForm):
     """
     Clase Forma de la clase modelo Municipio.
@@ -763,7 +761,6 @@ class HistoricoCambioForm(ModelForm):
                 attrs={'class': 'campo', 'size': '255', 'onkeypress': 'return revisarLetras(event)',
                        'onchange': 'validar(this)'}),
         }
->>>>>>> origin/master
 
 DiagnosticoEstudioFormSet = modelformset_factory(DiagnosticoEstudio, form=DiagnosticoEstudioForm, extra=0, can_delete=True)
 DiagnosticoExamenFormSet = modelformset_factory(DiagnosticoExamen, form=DiagnosticoExamenForm, extra=0)

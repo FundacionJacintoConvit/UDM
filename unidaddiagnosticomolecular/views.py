@@ -254,11 +254,11 @@ class IndiceView(View):
                 settings.URL_PREFIX + '/reestablecer_clave?mensaje= Clave Vencida, debe reestablecer su contraseña. Para reestablecerla ingrese su usuario')
         else:
             if request.user.has_perms(( 'unidaddiagnosticomolecular.diagnostico_medico', )):
-            	return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda')
-        	elif request.user.has_perms(( 'unidaddiagnosticomolecular.diagnostico_patologo', )):
-            	return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda')
-        	elif request.user.has_perms(( 'unidaddiagnosticomolecular.diagnostico_udm', )):
-            	return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda')
+                return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda')
+            elif request.user.has_perms(( 'unidaddiagnosticomolecular.diagnostico_patologo', )):
+                return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda')
+            elif request.user.has_perms(( 'unidaddiagnosticomolecular.diagnostico_udm', )):
+                return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda')
             else:
                 return HttpResponseRedirect(settings.URL_PREFIX + '/login')
 
