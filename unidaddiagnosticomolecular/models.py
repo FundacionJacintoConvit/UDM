@@ -5,11 +5,26 @@ from __future__ import unicode_literals
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
+class Municipio(models.Model):
+    id = models.AutoField(primary_key=True)
+    nombre = models.CharField(verbose_name='Nombre', max_length=255)
+    estado = models.ForeignKey('Estado')
+
+    def __unicode__(self):
+        return unicode(self.nombre) + ' - ' + unicode(self.estado)
+
+    class Meta:
+        managed = False
+        db_table = 't_udm_municipio'
+        verbose_name = 'Municipio'
+        verbose_name_plural = 'Municipios'
+        ordering = ['nombre']
+
 class Ciudad(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(verbose_name='Nombre', max_length=255)
     estado = models.ForeignKey('Estado')
-	
+
     def __unicode__(self):
         return unicode(self.nombre) + ' - ' + unicode(self.estado)
 
@@ -18,6 +33,21 @@ class Ciudad(models.Model):
         db_table = 't_udm_ciudad'
         verbose_name = 'Ciudad'
         verbose_name_plural = 'Ciudades'
+        ordering = [ 'nombre' ]
+
+class Parroquia(models.Model):
+    id = models.AutoField(primary_key=True)
+    nombre = models.CharField(verbose_name='Nombre', max_length=255)
+    municipio = models.ForeignKey('Municipio')
+
+    def __unicode__(self):
+        return unicode(self.nombre) + ' - ' + unicode(self.municipio)
+
+    class Meta:
+        managed = False
+        db_table = 't_udm_parroquia'
+        verbose_name = 'Parroquia'
+        verbose_name_plural = 'Parroquias'
         ordering = [ 'nombre' ]
 
 class Institucion(models.Model):
@@ -104,37 +134,6 @@ class TipoCancer(models.Model):
         db_table = 't_udm_tipo_cancer'
         verbose_name = 'Tipo de Cancer'
         verbose_name_plural = 'Tipos de Cancer'
-        ordering = [ 'orden' ]
-		
-class TipoAntecedente(models.Model):
-    id = models.AutoField(primary_key=True)
-    nombre = models.CharField(verbose_name='Nombre', max_length=255)
-    orden = models.IntegerField(verbose_name='Órden', blank=True, null=True)
-
-    def __unicode__(self):
-        return unicode(self.nombre)
-
-    class Meta:
-        managed = False
-        db_table = 't_udm_tipo_antecedente'
-        verbose_name = 'Tipo de Antecedente'
-        verbose_name_plural = 'Tipos de Antecedente'
-        ordering = [ 'orden' ]
-
-class TipoExamen(models.Model):
-    id = models.AutoField(primary_key=True)
-    nombre = models.CharField(verbose_name='Nombre', max_length=255)
-    tipo = models.CharField(verbose_name='Tipo', max_length=255)
-    orden = models.IntegerField(verbose_name='Órden', blank=True, null=True)
-
-    def __unicode__(self):
-        return unicode(self.nombre)
-
-    class Meta:
-        managed = False
-        db_table = 't_udm_tipo_examen'
-        verbose_name = 'Tipo de Exámen'
-        verbose_name_plural = 'Tipos de Exámen'
         ordering = [ 'orden' ]
 
 class TipoEstudio(models.Model):
@@ -238,18 +237,20 @@ class Diagnostico(models.Model):
         db_table = 't_udm_diagnostico'
         permissions = (( 'diagnostico_medico', 'Acceso Médico'), ( 'diagnostico_patologo', 'Acceso Patólogo' ), ( 'diagnostico_udm', 'Acceso UDM' ),)
 
-class DiagnosticoAntecedente(models.Model):
+class TipoExamen(models.Model):
     id = models.AutoField(primary_key=True)
-    antecedente = models.CharField(verbose_name='Antecedente', max_length=255, blank=True, null=True)
-    nexo_familiar = models.CharField(verbose_name='Nexo Familiar', max_length=255, blank=True, null=True)
-    presente = models.NullBooleanField(verbose_name='Hay presente')
-    otro = models.NullBooleanField(verbose_name='Es otro')
+    nombre = models.CharField(verbose_name='Nombre', max_length=255)
+    tipo = models.CharField(verbose_name='Tipo', max_length=255)
     orden = models.IntegerField(verbose_name='Órden', blank=True, null=True)
-    tipo_antecedente = models.ForeignKey(TipoAntecedente, blank=True, null=True)
-    diagnostico = models.ForeignKey(Diagnostico, blank=True, null=True)
+
+    def __unicode__(self):
+        return unicode(self.nombre)
+
     class Meta:
         managed = False
-        db_table = 't_udm_diagnostico_antecedente'
+        db_table = 't_udm_tipo_examen'
+        verbose_name = 'Tipo de Exámen'
+        verbose_name_plural = 'Tipos de Exámen'
         ordering = [ 'orden' ]
 
 class DiagnosticoTrasladoMuestra(models.Model):
@@ -306,10 +307,10 @@ class DiagnosticoSintoma(models.Model):
 class Estado(models.Model):
     id = models.AutoField(primary_key=True)
     nombre = models.CharField(verbose_name='Nombre', max_length=255)
-	
+
     def __unicode__(self):
         return unicode(self.nombre)
-		
+
     class Meta:
         managed = False
         db_table = 't_udm_estado'
@@ -324,7 +325,7 @@ class Paciente(models.Model):
     apellido_primero = models.CharField(verbose_name='Primer Apellido', max_length=255)
     apellido_segundo = models.CharField(verbose_name='Segundo Apellido', max_length=255)
     tipo_identificacion = models.CharField(verbose_name='', max_length=1, choices=(( 'V', 'V'), ( 'E', 'E' ), ( 'P', 'P')), blank=True, null=True)
-    identificacion = models.CharField(verbose_name='C.I. / Pasaporte', max_length=20, blank=True, null=True)
+    identificacion = models.CharField(verbose_name='C.I. / Pasaporte', max_length=20, blank=True, null=True, unique=True)
     partida_nacimiento = models.CharField(verbose_name='Partida de Nacimiento', max_length=20, blank=True, null=True)
     fecha_nacimiento = models.DateField(verbose_name='Fecha de Nacimiento', blank=True, null=True)
     edad_anios = models.DecimalField(verbose_name='Años', max_digits=3, decimal_places=0, blank=True, null=True)
@@ -351,6 +352,7 @@ class Paciente(models.Model):
     familiares_observaciones = models.CharField(verbose_name='Observaciones', max_length=4000, blank=True, null=True)
     numero_historia = models.CharField(verbose_name='Casa / Edificio', max_length=255, blank=True, null=True)
     ciudad = models.ForeignKey(Ciudad, null=True)
+    parroquia = models.ForeignKey(Parroquia, null=True)
     estado_civil = models.ForeignKey(EstadoCivil, related_name='estado_civil', null=True)
     nivel_estudio = models.ForeignKey(NivelEstudio, related_name='nivel_estudio', null=True)
     represent_estado_civil = models.ForeignKey(EstadoCivil, related_name='represent_estado_civil', blank=True, null=True)
@@ -358,3 +360,44 @@ class Paciente(models.Model):
     class Meta:
         managed = False
         db_table = 't_udm_paciente'
+
+class HistoricoCambio(models.Model):
+    id = models.AutoField(primary_key=True)
+    fecha = models.DateField(verbose_name='Fecha', blank=True, null=True)
+    campo_modificado = models.CharField(verbose_name='Campo modificado', max_length=255)
+    valor_anterior = models.CharField(verbose_name='Valor anterior', max_length=255)
+    valor_actual = models.CharField(verbose_name='Valor actual', max_length=255)
+    paciente = models.ForeignKey(Paciente, related_name='paciente', null=True)
+    usuario = models.ForeignKey(UDMUser, related_name='usuario', null=True)
+    class Meta:
+        managed = False
+        db_table = 't_udm_historico_cambio'
+
+class TipoAntecedente(models.Model):
+    id = models.AutoField(primary_key=True)
+    nombre = models.CharField(verbose_name='Nombre', max_length=255)
+    orden = models.IntegerField(verbose_name='Órden', blank=True, null=True)
+
+    def __unicode__(self):
+        return unicode(self.nombre)
+
+    class Meta:
+        managed = False
+        db_table = 't_udm_tipo_antecedente'
+        verbose_name = 'Tipo de Antecedente'
+        verbose_name_plural = 'Tipos de Antecedente'
+        ordering = [ 'orden' ]
+
+class DiagnosticoAntecedente(models.Model):
+    id = models.AutoField(primary_key=True)
+    antecedente = models.CharField(verbose_name='Antecedente', max_length=255, blank=True, null=True)
+    nexo_familiar = models.CharField(verbose_name='Nexo Familiar', max_length=255, blank=True, null=True)
+    presente = models.NullBooleanField(verbose_name='Hay presente')
+    otro = models.NullBooleanField(verbose_name='Es otro')
+    orden = models.IntegerField(verbose_name='Órden', blank=True, null=True)
+    tipo_antecedente = models.ForeignKey(TipoAntecedente, blank=True, null=True)
+    paciente = models.ForeignKey(Paciente, blank=True, null=True)
+    class Meta:
+        managed = False
+        db_table = 't_udm_diagnostico_antecedente'
+        ordering = [ 'orden' ]

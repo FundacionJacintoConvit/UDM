@@ -5,7 +5,7 @@ import logging
 from django.forms import ModelForm, HiddenInput, TextInput, Textarea, DateInput, Select, RadioSelect, FileInput, ChoiceField, CheckboxInput, ValidationError, CharField, ChoiceField
 from django.forms.models import modelformset_factory
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
-from unidaddiagnosticomolecular.models import UDMUser, Paciente, Diagnostico, DiagnosticoExamen, DiagnosticoSintoma, DiagnosticoEstudio, DiagnosticoAntecedente, DiagnosticoTrasladoMuestra, Ciudad, Estado, Institucion, Unidad, EstadoCivil, NivelEstudio, TipoEnfermedad, TipoCancer, TipoAntecedente, TipoEstudio, TipoExamen
+from unidaddiagnosticomolecular.models import UDMUser, Paciente, Diagnostico, DiagnosticoExamen, DiagnosticoSintoma, DiagnosticoEstudio, DiagnosticoAntecedente, DiagnosticoTrasladoMuestra, Ciudad, Estado, Institucion, Unidad, EstadoCivil, NivelEstudio, TipoEnfermedad, TipoCancer, TipoAntecedente, TipoEstudio, TipoExamen, Parroquia, Municipio, HistoricoCambio
 logger = logging.getLogger(__name__)
 
 class UDMUserForm(ModelForm):
@@ -645,6 +645,7 @@ class DiagnosticoTrasladoMuestraForm(ModelForm):
             'orden': HiddenInput(attrs={ 'class': 'campo' }),
         }
 
+<<<<<<< HEAD
 class UDMRegistroUserForm(ModelForm): #modelFomr
     def clean_username(self):
         username = self.cleaned_data["username"]
@@ -692,6 +693,77 @@ class UDMRegistroUserForm(ModelForm): #modelFomr
             'email': 'Correo electrónico',
         }
 
+=======
+class MunicipioForm(ModelForm):
+    """
+    Clase Forma de la clase modelo Municipio.
+    """
+
+    class Meta(object):
+        """
+        Clase meta de la clase forma MunicipioForm.
+
+        model: La clase modelo.
+        fields: Los campos a mostrar.
+        widgets: Los tipos de componentes visuales.
+        """
+
+        model = Municipio
+        fields = ['nombre', 'estado']
+        widgets = {
+            'nombre': TextInput(attrs={'class': 'campo', 'size': '40'}),
+        }
+
+class ParroquiaForm(ModelForm):
+    """
+    Clase Forma de la clase modelo Parroquia.
+    """
+
+    class Meta(object):
+        """
+        Clase meta de la clase forma ParroquiaForm.
+
+        model: La clase modelo.
+        fields: Los campos a mostrar.
+        widgets: Los tipos de componentes visuales.
+        """
+
+        model = Parroquia
+        fields = ['nombre', 'municipio']
+        widgets = {
+            'nombre': TextInput(attrs={'class': 'campo', 'size': '40'}),
+        }
+
+class HistoricoCambioForm(ModelForm):
+    """
+    Clase Forma de la clase modelo HistoricoCambio.
+    """
+
+    class Meta(object):
+        """
+        Clase meta de la clase forma HistoricoCambioForm.
+
+        model: La clase modelo.
+        fields: Los campos a mostrar.
+        widgets: Los tipos de componentes visuales.
+        """
+
+        model = HistoricoCambio
+        fields = ['id', 'fecha', 'campo_modificado', 'valor_anterior', 'valor_actual']
+        widgets = {
+            'id': TextInput(attrs={'class': 'campo', 'size': '40', 'disabled': 'true'}),
+            'fecha': DateInput(attrs={ 'class': 'campo', 'readonly': 'true', 'onchange': 'validar(this)' }),
+            'campo_modificado': TextInput(
+                attrs={'class': 'campo', 'size': '100', 'onkeypress': 'return revisarLetras(event)',
+                       'onchange': 'validar(this)'}),
+            'valor_anterior': TextInput(
+                attrs={'class': 'campo', 'size': '255', 'onkeypress': 'return revisarLetras(event)',
+                       'onchange': 'validar(this)'}),
+            'valor_actual': TextInput(
+                attrs={'class': 'campo', 'size': '255', 'onkeypress': 'return revisarLetras(event)',
+                       'onchange': 'validar(this)'}),
+        }
+>>>>>>> origin/master
 
 DiagnosticoEstudioFormSet = modelformset_factory(DiagnosticoEstudio, form=DiagnosticoEstudioForm, extra=0, can_delete=True)
 DiagnosticoExamenFormSet = modelformset_factory(DiagnosticoExamen, form=DiagnosticoExamenForm, extra=0)

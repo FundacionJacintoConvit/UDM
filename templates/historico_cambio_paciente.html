@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% load render_table from django_tables2 %}
+{% block titulo %}Hist&oacute;rico de cambios{% endblock %}
+{% block contenido %}
+   <table border="0" cellpadding="2" cellspacing="2" width="100%">
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Introduzca alg&uacute;n par&aacute;metro de b&uacute;squeda y presione el bot&oacute;n buscar</legend>
+		  <form id="busqueda_historico_cambio_paciente" name="busqueda_historico_cambio_paciente" action="{% url 'historico_cambio_paciente' pk %}" method="get">
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+	  	    <tr>
+		      <td width="15%">
+				<label for="id_buscar">Buscar</label>
+			  </td>
+			  <td width="70%">
+				<input class="campo" id="id_historico_cambio_paciente" name="busqueda" type="text" size="80"/>
+			  </td>
+			  <td width="15%">
+				<input class="campo" name="buscar" type="button" value="Buscar cambio registrado" onclick="this.form.submit()"/>
+			  </td>
+			</tr>
+			<tr>
+				<td>
+					&nbsp;
+				</td>
+				<td class="error" colspan="2">
+			    	<span id="error_historico_cambio_paciente"></span>
+			  	</td>
+			</tr>
+			<tr>
+			  <td colspan="3">
+				<div class="container nota">Par&aacute;metros de b&uacute;squeda: campo modificado, valor anterior, valor actual, primer nombre o apellido del m&eacute;dico que hiz&oacute; la modificaci&oacute;n</div>
+			  </td>
+			</tr>
+			<tr>
+				<td>
+					&nbsp;
+				</td>
+			</tr>
+		  </table>
+		 </form>
+		</fieldset>
+	  </td>
+	</tr>
+    <tr>
+      <td>
+	    <fieldset>
+		  <legend>Resultado de la consulta</legend>
+  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
+	  	    <tr>
+		      <td class="container">
+				{% render_table tabla %}
+			  </td>
+			</tr>
+			<tr>
+		      <td>
+				  &nbsp;
+			    <input id="boton_cancelar" name="boton_cancelar" type="button" value="Volver" onclick="if (confirm('\u00BFDesea volver?')) document.location='{% url 'busqueda' %}'"/>
+			  </td>
+			</tr>
+		  </table>
+		</fieldset>
+	  </td>
+	</tr>
+  </table>
+{% endblock %}
