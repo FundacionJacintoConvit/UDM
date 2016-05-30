@@ -42,6 +42,7 @@ class UDMUserForm(ModelForm):
         }
 
 class UDMUserCreationForm(UserCreationForm):
+
     def clean_username(self):
         username = self.cleaned_data["username"]
         try:
@@ -643,7 +644,55 @@ class DiagnosticoTrasladoMuestraForm(ModelForm):
 			'ruta': FileInput(attrs={ 'class': 'campo', 'size': '40', 'accept': 'image/gif,image/jpeg,image/pjpeg,image/png,image/tiff,image/x-tiff,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation', 'onchange': 'validar(this)' }),
             'orden': HiddenInput(attrs={ 'class': 'campo' }),
         }
-		
+
+class UDMRegistroUserForm(ModelForm): #modelFomr
+    def clean_username(self):
+        username = self.cleaned_data["username"]
+        try:
+            UDMUser._default_manager.get(username=username)
+        except UDMUser.DoesNotExist:
+            return username
+        raise ValidationError(self.error_messages['duplicate_username'])
+
+    class Meta(UserCreationForm.Meta):
+        model = UDMUser
+        fields = [ 'first_name', 'last_name', 'nombre_segundo', 'apellido_segundo', 'nacionalidad', 'cedula_pasaporte', 'edad', 'fecha_nacimiento','sexo','email','profesion', 'especializacion', 'especializacion_culminada' , 'numero_mpps', 'numero_colegio', 'email', 'telefono', 'unidad_fecha_inicio', 'unidad_fecha_fin', 'unidad_director', 'unidad_director_telefono', 'unidad_director_email']
+        # , 'ubicacion_colegio',  'institucion', 'unidad', 'ciudad' ]
+        widgets = {
+            'first_name': TextInput(attrs={ 'size': '35', 'enable': 'true' ,'onkeypress': 'return revisarLetras(event)','onchange': 'validar(this)' }),
+            'nombre_segundo': TextInput(attrs={ 'size': '35', 'enable': 'true' , 'onkeypress': 'return revisarLetras(event)','onchange': 'validar(this)' }),
+            'last_name': TextInput(attrs={ 'size': '35', 'enable': 'true', 'onkeypress': 'return revisarLetras(event)','onchange': 'validar(this)'  }),
+            'apellido_segundo': TextInput(attrs={ 'size': '35', 'enable': 'true', 'onkeypress': 'return revisarLetras(event)','onchange': 'validar(this)'  }),
+            'cedula_pasaporte': TextInput(attrs={ 'size': '35', 'enable': 'true','onkeypress': 'return revisarLetrasNumeros(event)', 'onchange': 'validar(this)' }),
+            'fecha_nacimiento': DateInput(attrs={ 'class': 'campo', 'size': '32', 'readonly': 'true', 'onchange': 'calcularEdad(this); validar(this)' }),
+            'edad': TextInput(attrs={'class': 'campo', 'size': '12', 'enable': 'true', 'onkeypress': 'return revisarNumeros(event)', 'onchance':'tieneEdadAnios(this);'}),
+            'sexo': Select(attrs={ 'class': 'campo', 'onchange': 'validar(this)' }),
+            'nacionalidad': Select(attrs={'class': 'campo', 'onchange': 'validar(this)'}),
+            'profesion': Select(attrs={'enable': 'true' , 'onchange':  'validar(this)'}),
+            'especializacion': TextInput(attrs={ 'size': '35', 'enable': 'true','onkeypress': 'return revisarLetras(event)', 'onchange':  'validar(this)' }),
+            'especializacion_culminada': Select(attrs={ 'enable': 'true', 'onchange':  'validar(this)' }),
+            'numero_mpps': TextInput(attrs={ 'size': '35', 'enable': 'true', 'onkeypress': 'return revisarNumeros(event)', 'onchange':  'validar(this)' }),
+            'numero_colegio': TextInput(attrs={ 'size': '35', 'enable': 'true', 'onkeypress': 'return revisarNumeros(event)', 'onchange':  'validar(this)' }),
+            #'ubicacion_colegio': Select(attrs={ 'enable': 'true' }),
+            'email': TextInput(attrs={ 'size': '35', 'enable': 'true', 'onchange':  'validar(this)' }),
+            'telefono': TextInput(attrs={ 'size': '35', 'enable': 'true', 'onkeypress': 'return revisarTelefono(event)', 'onchange':  'validar(this)' }),
+            'unidad_fecha_inicio':  DateInput(attrs={ 'class': 'campo', 'size': '25', 'readonly': 'true', 'onchange':  'validar(this)' }),
+            'unidad_fecha_fin': DateInput(attrs={ 'class': 'campo', 'size': '25', 'readonly': 'true' }),
+            'unidad_director': TextInput(attrs={ 'size': '35', 'enable': 'true' , 'onkeypress': 'return revisarLetras(event)', 'onchange': 'validar(this)' }),
+            'unidad_director_telefono': TextInput(attrs={ 'size': '35', 'enable': 'true',  'onkeypress': 'return revisarTelefono(event)','onchange': 'validar(this)' }),
+            'unidad_director_email': TextInput(attrs={ 'size': '35', 'enable': 'true','onchange': 'validar(this)' }),
+            #'institucion': Select(attrs={ 'disabled': 'true' }),
+            #'unidad': Select(attrs={ 'disabled': 'true' }),
+            #'ciudad': Select(attrs={ 'disabled': 'true' }),
+            #'firma': FileInput(attrs={ 'size': '40', 'disabled': 'true', 'accept': 'image/gif,image/jpeg,image/pjpeg,image/png,image/tiff,image/x-tiff' }),
+        }
+        labels = {
+            'first_name': 'Primer Nombre',
+            'last_name': 'Primer Apellido',
+            'email': 'Correo electrónico',
+        }
+
+
 DiagnosticoEstudioFormSet = modelformset_factory(DiagnosticoEstudio, form=DiagnosticoEstudioForm, extra=0, can_delete=True)
 DiagnosticoExamenFormSet = modelformset_factory(DiagnosticoExamen, form=DiagnosticoExamenForm, extra=0)
 DiagnosticoSintomaFormSet = modelformset_factory(DiagnosticoSintoma, form=DiagnosticoSintomaForm, extra=0)

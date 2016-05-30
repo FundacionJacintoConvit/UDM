@@ -4,6 +4,7 @@ from datetime import date, datetime
 import os
 import logging
 import smtplib
+import random
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -26,8 +27,8 @@ from django.forms.models import modelformset_factory
 
 from commons.convit import constants
 from commons.convit.decorators import ConvitLoggerExceptionDecorator
-from unidaddiagnosticomolecular.models import Paciente, Diagnostico, DiagnosticoExamen, DiagnosticoSintoma, DiagnosticoEstudio, DiagnosticoAntecedente, DiagnosticoTrasladoMuestra, Ciudad, Estado, TipoAntecedente, TipoEstudio, TipoExamen
-from unidaddiagnosticomolecular.forms import PacienteForm, PacienteMostrarForm, DiagnosticoMedicoForm, DiagnosticoPatologoForm, DiagnosticoUDMForm, DiagnosticoExamenForm, DiagnosticoSintomaForm, DiagnosticoEstudioForm, DiagnosticoExamenForm, DiagnosticoAntecedenteForm, DiagnosticoTrasladoMuestraForm, UDMUserForm, DiagnosticoExamenFormSet, DiagnosticoSintomaFormSet, DiagnosticoEstudioFormSet, DiagnosticoExamenFormSet, DiagnosticoAntecedenteFormSet, DiagnosticoTrasladoMuestraFormSet
+from unidaddiagnosticomolecular.models import Paciente, Diagnostico, DiagnosticoExamen, DiagnosticoSintoma, DiagnosticoEstudio, DiagnosticoAntecedente, DiagnosticoTrasladoMuestra, Ciudad, Estado, TipoAntecedente, TipoEstudio, TipoExamen, UDMUser, Institucion, Unidad
+from unidaddiagnosticomolecular.forms import PacienteForm, PacienteMostrarForm, DiagnosticoMedicoForm, DiagnosticoPatologoForm, DiagnosticoUDMForm, DiagnosticoExamenForm, DiagnosticoSintomaForm, DiagnosticoEstudioForm, DiagnosticoExamenForm, DiagnosticoAntecedenteForm, DiagnosticoTrasladoMuestraForm, UDMUserForm, DiagnosticoExamenFormSet, DiagnosticoSintomaFormSet, DiagnosticoEstudioFormSet, DiagnosticoExamenFormSet, DiagnosticoAntecedenteFormSet, DiagnosticoTrasladoMuestraFormSet, UDMRegistroUserForm
 
 logger = logging.getLogger(__name__)
 
@@ -167,14 +168,39 @@ class IndiceView(View):
             El objeto HTTP Response.
         """
 
-        if request.user.has_perms(( 'unidaddiagnosticomolecular.diagnostico_medico', )):
-            return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda_diagnostico_medico')
-        elif request.user.has_perms(( 'unidaddiagnosticomolecular.diagnostico_patologo', )):
-            return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda_diagnostico_patologo')
-        elif request.user.has_perms(( 'unidaddiagnosticomolecular.diagnostico_udm', )):
-            return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda_diagnostico_udm')
+        if request.user.fecha_ult_reest_clave == None: # Si el usuario no tiene una fecha de ultima actualización de clave
+            request.user.fecha_ult_reest_clave = date.today().strftime('%Y-%m-%d') # se le asigna la fecha del día en el que está ingresando
+
+        if request.user.is_clave_caducable == None:
+            request.user.is_clave_caducable = True
+
+        formato_fecha = '%Y-%m-%d'
+
+        fecha_actual = date.today().strftime(formato_fecha) #fecha actual
+        fecha_usuario = request.user.fecha_ult_reest_clave.strftime(formato_fecha) #fecha de la último cambio de contraseña
+        fecha_fin_convenio = request.user.unidad_fecha_fin.strftime(formato_fecha)
+
+        # se necesitan estas conversiones para realizar operaciones con fecha
+        fecha_actual = datetime.strptime(fecha_actual, formato_fecha)
+        fecha_usuario = datetime.strptime(fecha_usuario, formato_fecha)
+        fecha_fin_convenio = datetime.strptime( fecha_fin_convenio, formato_fecha)
+        diferencia_dias = int((fecha_actual - fecha_usuario).days)
+
+        if (diferencia_dias >= 90 and request.user.is_clave_caducable == True or  fecha_fin_convenio > fecha_actual ): #Se verifica que el usuario no tenga la clave vencida
+            return HttpResponseRedirect(
+                settings.URL_PREFIX + '/reestablecer_clave?mensaje= Clave Vencida, debe reestablecer su contraseña. Para reestablecerla ingrese su usuario')
         else:
-            return HttpResponseRedirect(settings.URL_PREFIX + '/login')
+            if request.user.has_perms(('unidaddiagnosticomolecular.diagnostico_medico',)):
+                return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda_diagnostico_medico')
+            elif request.user.has_perms(('unidaddiagnosticomolecular.diagnostico_patologo',)):
+                return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda_diagnostico_patologo')
+            elif request.user.has_perms(('unidaddiagnosticomolecular.diagnostico_udm',)):
+                return HttpResponseRedirect(settings.URL_PREFIX + '/busqueda_diagnostico_udm')
+            else:
+                return HttpResponseRedirect(settings.URL_PREFIX + '/login')
+
+
+
 
 class BusquedaDiagnosticoMedicoView(View):
     """
@@ -960,3 +986,280 @@ class GenerarReporteView(View):
         c.save()
 			
         return response
+
+class RegistrarUsuarioUdmView(View):
+    """
+    Clase Vista que registra un usuario udm/medico/patalogo.
+
+    template_name: Nombre de la plantilla.
+    """
+
+    template_name = 'registro_user_udm.html'
+
+   # @ConvitLoggerExceptionDecorator(permisos='unidaddiagnosticomolecular.registro_user_udm', logger=logger)
+    def get(self, request, pk, *args, **kwargs):
+        if len(request.GET.items()) > 0:
+            udm_user_forma = UDMRegistroUserForm(request.GET)
+            id_estado = int(request.GET.get('id_estado', '0'))
+            id_ciudad = int(request.GET.get('id_ciudad', '0'))
+            id_institucion = int(request.GET.get('id_institucion', '0'))
+            id_unidad = int(request.GET.get('id_unidad', '0'))
+        else:
+            id_estado = 0
+            id_ciudad = 0
+            id_institucion = 0
+            id_unidad = 0
+            udm_user_forma = UDMRegistroUserForm()
+
+        return render(request, self.template_name,
+                  {'udm_user_forma': udm_user_forma,
+                   'instituciones': Institucion.objects.all().order_by('nombre'),
+                   'unidades': Unidad.objects.all().order_by('nombre'),
+                   'estados': Estado.objects.all().order_by('nombre'),
+                   'ciudades': Ciudad.objects.filter(estado_id=id_estado).order_by('nombre'),
+                   'id_estado': id_estado, 'id_ciudad': id_ciudad, 'id_institucion': id_institucion,'id_unidad': id_unidad})
+
+    def post(self, request, pk, *args, **kwargs):
+        # se extrae la ubicacion del  colegio del form
+        id_estado = int(request.POST.get('id_estado', '0'))
+        id_ciudad = int(request.POST.get('id_ciudad', '0'))
+
+        id_istitucion = int(request.POST.get('id_institucion', '0'))
+        id_unidad = int(request.POST.get('id_unidad', '0'))
+
+        #se crea el nombre de usuario tomando las iniciales del nombre
+        username = request.POST.get('first_name')[0:1] + request.POST.get('nombre_segundo')[0:1] + request.POST.get('last_name')[0:1] + request.POST.get('apellido_segundo')[0:1]
+        username = username.lower()
+
+        #se verifica si el username está registrado en la Base de datos
+        try:
+            num_user = UDMUser.objects.filter(username__icontains=username).count()
+        except UDMUser.DoesNotExist:
+            num_user = 0
+
+        ciudad = Ciudad.objects.get(id=id_ciudad)
+        estado = ciudad.estado.nombre
+        istitucion = Institucion.objects.get(id=id_istitucion)
+        unidad = Unidad.objects.get(id=id_unidad)
+        user = UDMUser()
+        user.ciudad = ciudad
+
+        #Si ya existe un usuario con el mismo username, se concatena un número secuencial al username
+        if (num_user != 0):
+            user.username = username + str(num_user + 1)
+        else:
+            user.username = username
+
+        user.ubicacion_colegio = estado
+        user.institucion = istitucion
+        user.unidad = unidad
+        user.fecha_ult_reest_clave = date.today().strftime('%Y-%m-%d')
+        user.is_active = False
+        user.is_clave_caducable = True
+
+        #se extrae los datos del form
+        udm_user_forma = UDMRegistroUserForm(request.POST, instance=user)
+
+        if udm_user_forma.is_valid():
+            id_ciudad = int(request.POST.get('id_ciudad', '0'))
+            usuario = udm_user_forma.save()
+            self.enviar_correo(usuario)
+            return HttpResponseRedirect(
+            settings.URL_PREFIX + '/login?mensaje=Se ha guardado su registro. Recibirá un correo del administrador con sus datos de usuario ')
+
+
+        return render(request, self.template_name,
+                      {'udm_user_forma': UDMRegistroUserForm()})
+
+    def enviar_correo(self, usuario):
+        contenido = u'<html><body><table border="0" width="100%"><tr><td align="left"><img src="{{ MEDIA_ROOT }}img/logo-j.png" width="79" height="60"/></td><td align="right"><img src="{{ MEDIA_ROOT }}img/logo-j.jpg" width="60" height="60"/></td></tr></table><p align="center"><b>SOLICITUD DE REGISTRO A LA UNIDAD DE DIAGNÓSTICO MOLECULAR</b></p><p>&nbsp;</p> '
+        contenido += u'<p>Se ha registrado a un nuevo usuario con los siguientes datos:  <ul>'
+        contenido += u' <li>Usuario: ' + usuario.username + u'</li>'
+        contenido += u' <li>Nombre: ' + usuario.first_name + u'</li>'
+        contenido += u' <li>Apellido: ' + usuario.last_name + u'</li>'
+        contenido += u' <li>Cédula: ' + usuario.cedula_pasaporte + u'</li>'
+        contenido += u' <li>Correo electrónico: ' + usuario.email + u'</li>'
+        contenido += u' </ul>'
+        contenido += u'</p><p>Fecha de Registro: '
+        contenido += date.today().strftime('%d/%m/%Y')
+        contenido += u'</p><p>Deberá revisar su información, asignarle una contraseña a través del portal del administrador y enviar al correo del nuevo usuario, su username y contraseña '
+        contenido += u'</p><table border="0" width="100%"><tr><td valign="top"><table border="0" width="100%"<tr><td colspan="2">&nbsp;</td></tr>'
+
+        mensaje = MIMEMultipart('alternative')
+        mensaje.set_charset('utf8')
+        mensaje['From'] = settings.EMAIL_SERVER_USERNAME
+        mensaje['To'] = ['udm@jacintoconvit.org', 'ronick.a.ruiz@jacintoconvit.org'] #'udm@jacintoconvit.org'
+        mensaje['Subject'] = u'Registro de nuevo usuario '
+        mensaje.attach(MIMEText(contenido, 'html', 'utf8'))
+
+        destinatarios = ['udm@jacintoconvit.org', 'ronick.a.ruiz@jacintoconvit.org']
+        server = smtplib.SMTP(settings.EMAIL_SERVER_URL)
+        server.ehlo()
+        server.starttls()
+        server.login(settings.EMAIL_SERVER_USERNAME, settings.EMAIL_SERVER_PASSWORD)
+        #server.sendmail(settings.EMAIL_SERVER_USERNAME, 'udm@jacintoconvit.org', mensaje.as_string())
+        server.sendmail(settings.EMAIL_SERVER_USERNAME, destinatarios, mensaje.as_string())
+        server.quit()
+
+class ReestablecerClaveView(View):
+    """
+    Clase Vista que permite consultar un usuario.
+
+    template_name: reestablecer_clave.html
+    """
+
+    template_name = 'reestablecer_clave.html'
+
+    #@ConvitLoggerExceptionDecorator(permisos='unidaddiagnosticomolecular.reestablecer_clave', logger=logger)
+
+
+    def get(self, request, *args, **kwargs):
+        busqueda = request.GET.get('busqueda', '')
+        if busqueda != '':
+            try:
+                usuario = UDMUser.objects.get(username__iexact=busqueda)
+            except UDMUser.DoesNotExist:
+                return HttpResponseRedirect(
+                    settings.URL_PREFIX + '/reestablecer_clave?mensaje=Usuario no registrado')
+
+            formato_fecha = '%Y-%m-%d'
+
+            fecha_actual = date.today().strftime(formato_fecha)
+            fecha_usuario = usuario.fecha_ult_reest_clave.strftime(formato_fecha)
+            fecha_fin_convenio = usuario.unidad_fecha_fin.strftime(formato_fecha)
+
+            # se necesitan estas conversiones para realizar operaciones con fecha
+            fecha_actual = datetime.strptime(fecha_actual, formato_fecha)
+            fecha_usuario = datetime.strptime(fecha_usuario, formato_fecha)
+            diferencia_dias = int((fecha_actual - fecha_usuario).days)
+            fecha_fin_convenio = datetime.strptime(fecha_fin_convenio, formato_fecha)
+
+
+            if (diferencia_dias < 90 or usuario.is_clave_caducable == False ) and fecha_fin_convenio < fecha_actual and usuario.is_active == True:
+                request.session["usuario_reestabl"] = busqueda
+                codigo = str(random.randint(1000, 10000))
+                usuario.codigo_cambio_clave = codigo
+                user_modificado = usuario.save()
+                self.enviar_correo_codigo_clave(usuario)
+                return HttpResponseRedirect(
+                    settings.URL_PREFIX + '/recuperar_clave?mensaje= Le hemos enviado un código a su correo electrónico para que pueda recuperar su contraseña. Por favor ingrese el código')
+
+            else:
+                self.enviar_correo(usuario)
+                return HttpResponseRedirect(
+                    settings.URL_PREFIX + '/login?mensaje= Clave Vencida, se ha enviado un correo al administrador quien le asignará una nueva contraseña')
+
+
+        return render(request, self.template_name)
+
+    def enviar_correo(self, usuario):
+        contenido = u'<html><body><table border="0" width="100%"><tr><td align="left"><img src="../html/static/img/logo-j.jpg" width="79" height="60"/></td><td align="right"><img src="../html/static/img/logo-j.jpg" width="60" height="60"/></td></tr></table><p align="center"><b>SOLICITUD DE REESTABLECIMIENTO DE CLAVE</b></p><p>&nbsp;</p> '
+        contenido += u'<p>La contraseña del usuario:'
+        contenido += usuario.first_name + u' ' + usuario.last_name
+        contenido += u' ha vencido. Por favor verifique si esta persona actualmente labora en la unidad. '
+        contenido += u'</p><p>Los datos del usuario son los siguientes: <ul>'
+        contenido += u' <li>Id: ' + str(usuario.id) + u'</li>'
+        contenido += u' <li>Nombre: ' + usuario.first_name + u'</li>'
+        contenido += u' <li>Apellido: ' + usuario.last_name + u'</li>'
+        contenido += u' <li>Usuario:' + usuario.username + u'</li>'
+        contenido += u' <li>Correo electrónico: ' + usuario.email + u'</li>'
+        contenido += u' </ul>'
+        contenido += u'</p><p>Fecha de solicitud: '
+        contenido += date.today().strftime('%d/%m/%Y')
+        contenido += u'</p><table border="0" width="100%"><tr><td valign="top"><table border="0" width="100%"<tr><td colspan="2">&nbsp;</td></tr>'
+
+        mensaje = MIMEMultipart('alternative')
+        mensaje.set_charset('utf8')
+        mensaje['From'] = settings.EMAIL_SERVER_USERNAME
+        mensaje['To'] = ['udm@jacintoconvit.org', 'ronick.a.ruiz@jacintoconvit.org']  # 'udm@jacintoconvit.org'
+        mensaje['Subject'] = u'Reestablecer contraseña'
+        mensaje.attach(MIMEText(contenido, 'html', 'utf8'))
+
+        destinatarios = ['udm@jacintoconvit.org', 'ronick.a.ruiz@jacintoconvit.org']
+        server = smtplib.SMTP(settings.EMAIL_SERVER_URL)
+        server.ehlo()
+        server.starttls()
+        server.login(settings.EMAIL_SERVER_USERNAME, settings.EMAIL_SERVER_PASSWORD)
+        # server.sendmail(settings.EMAIL_SERVER_USERNAME, 'udm@jacintoconvit.org', mensaje.as_string())
+        server.sendmail(settings.EMAIL_SERVER_USERNAME, destinatarios, mensaje.as_string())
+        server.quit()
+
+    def enviar_correo_codigo_clave(self, usuario):
+        contenido = u'<html><body><table border="0" width="100%"><tr><td align="left"><img src="{{ STATIC_URL }}img/logo-j.jpg" width="79" height="60"/></td><td align="right"><img src="../html/static/img/logo-j.jpg" width="60" height="60"/></td></tr></table><p align="center"><b>SOLICITUD DE RECUPERACIÓN DE CLAVE</b></p><p>&nbsp;</p> '
+        contenido += u'<p>Sr(a) ' + usuario.last_name + u'</p>'
+        contenido += u'<p> &nbsp; </p>'
+        contenido += u'<p>El código para reestablecer su contraseña es: ' + usuario.codigo_cambio_clave
+        contenido += u'</p> '
+        contenido += u'<table border="0" width="100%"><tr><td valign="top"><table border="0" width="100%"<tr><td colspan="2">&nbsp;</td></tr>'
+
+        mensaje = MIMEMultipart('alternative')
+        mensaje.set_charset('utf8')
+        mensaje['From'] = settings.EMAIL_SERVER_USERNAME
+        mensaje['To'] = usuario.email  # 'udm@jacintoconvit.org'
+        mensaje['Subject'] = u'Recuperación de contraseña'
+        mensaje.attach(MIMEText(contenido, 'html', 'utf8'))
+
+        server = smtplib.SMTP(settings.EMAIL_SERVER_URL)
+        server.ehlo()
+        server.starttls()
+        server.login(settings.EMAIL_SERVER_USERNAME, settings.EMAIL_SERVER_PASSWORD)
+        # server.sendmail(settings.EMAIL_SERVER_USERNAME, 'udm@jacintoconvit.org', mensaje.as_string())
+        server.sendmail(settings.EMAIL_SERVER_USERNAME, usuario.email, mensaje.as_string())
+        server.quit()
+
+class RecuperarClaveView(View):
+    """
+    Clase Vista que permite la recuperación de clave a través de un código enviado al correo
+    del usuario
+
+    template_name: recuperar_clave.html
+    """
+    template_name = 'recuperar_clave.html'
+
+    def get(self, request, *args, **kwargs):
+        """
+        Método get que comprueba si un código de recuperación de calve es válido
+
+        Args:
+            request: El objeto HTTP Request.
+
+        Returns:
+            El objeto HTTP Response.
+        """
+
+        codigo = request.GET.get('codigo', '')
+        if (codigo != '' and request.session["usuario_reestabl"]) :
+            usuario = UDMUser.objects.get(username__iexact=request.session["usuario_reestabl"])
+
+            if (codigo == usuario.codigo_cambio_clave):
+                return HttpResponseRedirect(settings.URL_PREFIX + '/cambiar_clave')
+
+            else:
+                return HttpResponseRedirect(
+                    settings.URL_PREFIX + '/recuperar_clave?mensaje= Código incorrecto')
+
+        return render(request, self.template_name)
+
+class CambiarClaveView(View):
+    """
+    Clase Vista que permite cambiar la clave de un usuario.
+
+    template_name: cambiar_clave.html
+    """
+
+    template_name = 'cambiar_clave.html'
+
+    def get(self, request, *args, **kwargs):
+        if request.session["usuario_reestabl"]:
+            return render(request, self.template_name)
+
+    def post(self, request, *args, **kwargs):
+        password_nueva = request.POST.get('pass_nueva', '0')
+        usuario = UDMUser.objects.get(username__iexact=request.session["usuario_reestabl"])
+        if usuario:
+            usuario.set_password = password_nueva
+            usuario.codigo_cambio_clave = None
+            usuario.save()
+            del request.session["usuario_reestabl"]
+            return HttpResponseRedirect(
+                settings.URL_PREFIX + '/login?mensaje=Su contraseña ha sido reestablecida con éxito ')

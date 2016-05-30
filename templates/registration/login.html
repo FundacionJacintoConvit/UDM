@@ -3,6 +3,15 @@
 {% block cargar %}
 <script type="text/javascript">
 function cargar() {
+		{% if request.GET.mensaje != null %}
+			alert('{{ request.GET.mensaje }}');
+		{% endif %}
+}
+
+function nuevoUsuario(campo) {
+    campo.form.action = '{% url 'registro_user_udm' '' %}';
+    campo.form.method = 'GET';
+	campo.form.submit();
 }
 
 function validar(forma) {
@@ -40,60 +49,84 @@ function validar(forma) {
     <tr>
       <td>
 	    <fieldset>
-		  <legend>Introduzca el usuario y contrase&ntilde;a</legend>
-  	       <table border="0" cellpadding="2" cellspacing="2" width="100%">
-	  	    <tr>
-		      <td align="center">
-				  <table border="0" cellpadding="2" cellspacing="2">
-					<tr>
-					  <td width="30%">
-						<label for="id_username"><span class="requerido">*</span>Usuario</label>
-					  </td>
-					  <td width="70%">
-						{{ form.username }}
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						&nbsp;
-					  </td>
-					  <td class="error">
-						<span id="error_username"></span>
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						<label for="id_numero_historia"><span class="requerido">*</span>Contrase&ntilde;a</label>
-					  </td>
-					  <td>
-						{{ form.password }}
-					  </td>
-					</tr>
-					<tr>
-					  <td>
-						&nbsp;
-					  </td>
-					  <td class="error">
-						<span id="error_password"></span>
-					  </td>
-					</tr>
-					<tr>
-					  <td align="center" class="error" colspan="2">
-						{% if form.errors %}
-						Usuario o clave inv&aacute;lidos
-						{% endif %}
-					  </td>
-					</tr>
-					<tr>
-					  <td align="center" colspan="2">
-						<input name="boton_entrar" type="button" value="Entrar" onclick="if (validar(this.form)) this.form.submit()"/>
-					  </td>
-					</tr>
-				  </table>
-			  </td>
-			</tr>
-		  </table>				
-		</fieldset>
+		  	<legend>Introduzca el usuario y contrase&ntilde;a</legend>
+					<table border="0" cellpadding="2" cellspacing="2" width="100%">
+	  	    	<tr>
+		      		<td align="center">
+				  			<table border="0" cellpadding="2" cellspacing="2">
+									<tr>
+					  				<td width="30%">
+											<label for="id_username"><span class="requerido">*</span>Usuario</label>
+					  				</td>
+					  				<td width="70%">
+											{{ form.username }}
+					 	 				</td>
+									</tr>
+									<tr>
+					  				<td>
+											&nbsp;
+					  				</td>
+					  				<td class="error">
+											<span id="error_username"></span>
+					  				</td>
+									</tr>
+									<tr>
+					  				<td>
+											<label for="id_numero_historia"><span class="requerido">*</span>Contrase&ntilde;a</label>
+					  				</td>
+					  				<td>
+											{{ form.password }}
+					  				</td>
+									</tr>
+									<tr>
+					  				<td>
+											&nbsp;
+					  				</td>
+					  				<td class="error">
+											<span id="error_password"></span>
+					 		 			</td>
+									</tr>
+									<tr>
+					  				<td align="center" class="error" colspan="2">
+											{% if form.errors %}
+												Usuario o clave inv&aacute;lidos
+											{% endif %}
+										</td>
+									</tr>
+									<tr>
+										<td align="center" colspan="2">
+											<a href="{% url 'reestablecer_clave' %}">Reestablecer Contrase&ntilde;a</a>
+										</td>
+									</tr>
+									<tr>
+										&nbsp;
+										&nbsp;
+										&nbsp;
+										<td align="center">
+										</td>
+					  				<td>
+						 	 			</td>
+									</tr>
+									<tr>
+										&nbsp;
+										<td align="center" colspan="2">
+											<table border="0" cellpadding="2" cellspacing="2">
+												<td align="center">
+													<input class="campo" name="nuevo" type="button" value="Nuevo Usuario" onclick="nuevoUsuario(this)"/>
+												</td>
+		      							<td align="center">
+													<input name="boton_entrar" type="button" value="Entrar" onclick="if (validar(this.form)) this.form.submit()"/>
+												</td>
+											</table>
+										</td>
+									</tr>
+
+
+								</table>
+			  			</td>
+						</tr>
+		  		</table>
+			</fieldset>
 	  </td>
 	</tr>
   </table>

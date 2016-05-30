@@ -1,0 +1,120 @@
+{% extends "base_nologin.html" %}
+{% block titulo %}Cambiar contrase&ntilde;a{% endblock %}
+{% block cargar %}
+<script type="text/javascript">
+function validar(campo) {
+var forma = document.getElementById('cambiar_clave');
+var campo1, errores = false;
+
+  if (campo == null) {
+	  document.getElementById('boton_salvar').disabled = true;
+	}
+
+    if ((campo == null) || (campo.id == 'id_pass_nueva')) {
+		campo1 = document.getElementById('id_pass_nueva');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_cambio_clave_forma_pass_nueva').innerHTML = 'Debe introducir una contraseña';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_cambio_clave_forma_pass_nueva').innerHTML = '&nbsp;';
+			}
+    }
+
+    if ((campo == null) || (campo.id == 'id_pass_conf')) {
+		campo1 = document.getElementById('id_pass_conf');
+		if (campo1.value.replace(/^\s+|\s+$/g,"").length == 0) {
+			document.getElementById('error_cambio_clave_forma_pass_conf').innerHTML = 'Debe intruducir la contraseña nuevamente';
+			if ((campo == null) && !errores) campo1.focus();
+			errores = true;
+		} else {
+			document.getElementById('error_cambio_clave_forma_pass_conf').innerHTML = '&nbsp;';
+			}
+    }
+
+  if ((campo == null) && errores) {
+	    document.getElementById('boton_salvar').disabled = false;
+	}
+
+	return !errores;
+}
+
+</script>
+{% endblock %}
+
+{% block contenido %}
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<form id="cambiar_clave" name="cambiar_clave" action="" enctype="multipart/form-data" method="post">
+{% csrf_token %}
+   <table border="0" cellpadding="2" cellspacing="2" width="100%">
+    <tr>
+      <td>
+	    	<fieldset>
+		  		<legend>Cambiar contrase&ntilde;a</legend>
+						<table border="0" cellpadding="2" cellspacing="2" width="100%">
+							<tr>
+								<td align="center">
+                  <table border="0" cellpadding="2" cellspacing="2">
+                    <tr>
+                      <td>
+                        <label for="">Ingrese la nueva contrase&ntilde;a:</label>
+                      </td>
+                      <td>
+                        <input type="password" id="id_pass_nueva" name="pass_nueva" value="" size="35" maxlength="127" onchange="validar(this)" />
+                      </td>
+                    </tr>
+                    <tr>
+			  				      <td>
+									    &nbsp;
+			  				      </td>
+								      <td class="error">
+									      <span id="error_cambio_clave_forma_pass_nueva"></span>
+								      </td>
+								      <td>
+									      &nbsp;
+								      </td>
+							      </tr>
+                    <tr>
+                      <td>
+                        <label for="">Ingrese nuevamente la contrase&ntilde;a:</label>
+                      </td>
+                      <td>
+                        <input type="password" id="id_pass_conf" name="pass_confirmada" value="" size="35" maxlength="127" onchange="validar(this)" />
+                      </td>
+                    </tr>
+                    <tr>
+			  				      <td>
+									    &nbsp;
+			  				      </td>
+								      <td class="error">
+									      <span id="error_cambio_clave_forma_pass_conf"></span>
+								      </td>
+								      <td>
+									      &nbsp;
+								      </td>
+							      </tr>
+                    &nbsp;
+                    <tr>
+                      <td align="center" colspan="2">
+									      <input id="boton_salvar" name="boton_salvar" type="button" value="Cambiar Contrase&ntilde;a" onclick="if (validar()) {this.form.method = 'POST'; this.form.submit() }"/>
+								      </td>
+                    </tr>
+									</table>
+
+								</td>
+							</tr>
+
+
+		        </table>
+		    </fieldset>
+	  	</td>
+		</tr>
+  </table>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+<p>&nbsp;</p>
+
+</form>
+{% endblock %}

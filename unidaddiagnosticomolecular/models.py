@@ -153,13 +153,18 @@ class TipoEstudio(models.Model):
         ordering = [ 'orden' ]
 
 class UDMUser(AbstractUser):
+    id = models.AutoField(primary_key=True)
     nombre_segundo = models.CharField(verbose_name='Segundo Nombre', max_length=255, blank=True)
     apellido_segundo = models.CharField(verbose_name='Segundo Apellido', max_length=255, blank=True)    
     nacionalidad = models.CharField(verbose_name='Nacionalidad', max_length=1, choices=(( 'V', 'Venezolano' ), ( 'E', 'Extranjero' )), blank=True, null=True)
     cedula_pasaporte = models.CharField(verbose_name='Número de Cédula o Pasaporte', max_length=255, blank=True, null=True)
+    fecha_nacimiento = models.DateField(verbose_name='Fecha de Nacimiento', blank=True, null=True)
     edad = models.IntegerField(verbose_name='Edad', blank=True, null=True)
     sexo = models.CharField(verbose_name='Sexo', max_length=1, choices=(( 'M', 'Masculino' ), ( 'F', 'Femenino' )), blank=True, null=True)
-    profesion = models.CharField(verbose_name='Profesión', max_length=255, blank=True, null=True)
+    fecha_ult_reest_clave = models.DateField(verbose_name='Fecha del último reestablacimiento de clave', blank=True, null=True)
+    is_clave_caducable = models.BooleanField(verbose_name='¿La contraseña tendrá caducidad?', blank=True)
+    codigo_cambio_clave = models.CharField(verbose_name='Código de recuperación de clave', max_length=255, blank=True, null=True)
+    profesion = models.CharField(verbose_name='Profesión', max_length=255, blank=True, null=True, choices=(('Médico','Médico'),('Biólogo','Biólogo'),('Bionalista','Bionalista')))
     especializacion = models.CharField(verbose_name='Especialización', max_length=255, blank=True, null=True)
     especializacion_culminada = models.CharField(verbose_name='Especialización Culminada?', max_length=1, choices=(( 'S', 'Si' ), ( 'N', 'No' )), blank=True, null=True)
     numero_mpps = models.CharField(verbose_name='N del MPPS', max_length=255, blank=True, null=True)
